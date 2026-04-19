@@ -426,7 +426,7 @@ body {
 
   <div id="hdr-right">
     <div id="bdm-lbl">BIG DADDY SIK MIX</div>
-    <div id="ver-lbl">MISS RUBY WORLDWIDE LLC • v1.2</div>
+    <div id="ver-lbl">MISS RUBY WORLDWIDE LLC • v1.4</div>
   </div>
 </div>
 
@@ -485,7 +485,7 @@ body {
 <!-- STATUS BAR -->
 <div id="statusbar">
   <div id="sl">A1 MOJO MANAGER | <span>A1 GARAGE DOOR SERVICE</span> | MORNING CALL CONTROL | <span>BIG DADDY SIK MIX</span></div>
-  <div id="sr">v1.4 • DABBING PUG PRODUCTIONS • MISS RUBY WORLDWIDE LLC</div>
+  <div id="sr">v1.4.1 • DABBING PUG PRODUCTIONS • MISS RUBY WORLDWIDE LLC</div>
 </div>
 
 <!-- STARTUP MODAL -->
@@ -702,10 +702,12 @@ function folderSelected(){
   const fa=document.getElementById("folder-arrow");
   const rb=document.getElementById("reload-btn");
   const ra=document.getElementById("reload-arrow");
-  if(fb){ 
-    fb.classList.remove("folder-pulse"); 
-    fb.classList.add("folder-done"); 
-    fb.textContent="✅ FOLDER SELECTED";
+  if(fb){
+    // Force stop all animation directly
+    fb.className="";
+    fb.style.cssText="padding:8px 18px;background:#1a1a1a;border:2px solid #333;border-radius:3px;color:#00cc44;font-family:Bebas Neue,sans-serif;font-size:14px;letter-spacing:2px;cursor:pointer;white-space:nowrap;animation:none;box-shadow:none;";
+    fb.textContent="✅ AUDIO FOLDER SET";
+    fb.onclick=null; // Disable clicking again
   }
   if(fa) fa.style.display="none";
   if(rb) rb.classList.add("reload-pulse");
