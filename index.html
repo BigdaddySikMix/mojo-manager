@@ -101,17 +101,63 @@ body {
 #folder-status { font-size:9px;color:var(--grey2);letter-spacing:1px;flex:1; }
 #folder-status span { color:var(--green); }
 #folder-btn {
-  padding:4px 12px;background:var(--inset);border:1px solid var(--border);
+  padding:6px 0;background:var(--inset);border:2px solid var(--border);
   border-radius:2px;color:var(--grey2);font-family:"Bebas Neue",sans-serif;
-  font-size:12px;letter-spacing:2px;cursor:pointer;transition:all 0.1s;
+  font-size:13px;letter-spacing:2px;cursor:pointer;transition:border-color 0.1s,box-shadow 0.1s;
+  width:220px;overflow:hidden;white-space:nowrap;position:relative;
 }
 #folder-btn:hover { border-color:var(--green);color:var(--green); }
+#folder-btn-inner {
+  display:inline-block;
+  padding-left:100%;
+  animation:marquee 4s linear infinite;
+  white-space:nowrap;
+}
+@keyframes marquee {
+  0% { transform:translateX(0); }
+  100% { transform:translateX(-100%); }
+}
+#folder-btn.folder-pulse {
+  border-color:var(--gold);
+  box-shadow:0 0 12px rgba(245,196,0,0.6);
+}
+#folder-btn.folder-pulse #folder-btn-inner {
+  color:var(--gold);
+  animation:marquee 3s linear infinite, textpulse 0.8s infinite;
+}
+@keyframes textpulse {
+  0%,100% { color:var(--gold); }
+  50% { color:#fff; }
+}
+#folder-btn.folder-done {
+  border-color:#333;box-shadow:none;
+}
+#folder-btn.folder-done #folder-btn-inner {
+  color:var(--grey2);
+  animation:none;
+  padding-left:8px;
+}
+.step-arrow {
+  font-size:18px;animation:arrowbounce 0.6s infinite alternate;
+}
+@keyframes arrowbounce {
+  from { transform:translateX(0); }
+  to { transform:translateX(4px); }
+}
 #reload-btn {
-  padding:4px 12px;background:var(--inset);border:1px solid var(--border);
+  padding:6px 16px;background:var(--inset);border:2px solid var(--border);
   border-radius:2px;color:var(--grey2);font-family:"Bebas Neue",sans-serif;
-  font-size:12px;letter-spacing:2px;cursor:pointer;transition:all 0.1s;
+  font-size:13px;letter-spacing:2px;cursor:pointer;transition:all 0.1s;
 }
 #reload-btn:hover { border-color:var(--amber);color:var(--amber); }
+#reload-btn.reload-pulse {
+  border-color:var(--amber);color:var(--amber);
+  animation:reloadpulse 0.8s infinite;
+}
+@keyframes reloadpulse {
+  0%,100% { box-shadow:0 0 8px rgba(255,170,0,0.6); }
+  50% { box-shadow:0 0 20px rgba(255,170,0,0.9); }
+}
 
 /* ══ MAIN ══ */
 #main { flex:1;display:flex;gap:8px;padding:8px;overflow:hidden;min-height:0; }
@@ -396,8 +442,12 @@ body {
 
 <!-- FOLDER BAR -->
 <div id="folder-bar">
-  <div id="folder-status">📁 <span id="folder-name">No folder selected</span></div>
-  <div id="folder-btn" onclick="selectFolder()">SELECT DROPS FOLDER</div>
+  <div id="folder-status">📁 <span id="folder-name">No folder selected — follow the steps above!</span></div>
+  <div id="folder-arrow" class="step-arrow">👉</div>
+  <div id="folder-btn" onclick="selectFolder()" class="folder-pulse">
+    <span id="folder-btn-inner">📁 SELECT MOJO AUDIO FOLDER &nbsp;&nbsp;&nbsp; 📁 SELECT MOJO AUDIO FOLDER &nbsp;&nbsp;&nbsp;</span>
+  </div>
+  <div id="reload-arrow" class="step-arrow" style="display:none">👉</div>
   <div id="reload-btn" onclick="loadFromFolder()">↺ RELOAD</div>
 </div>
 
@@ -447,7 +497,7 @@ body {
 <!-- STATUS BAR -->
 <div id="statusbar">
   <div id="sl">A1 MOJO MANAGER | <span>A1 GARAGE DOOR SERVICE</span> | MORNING CALL CONTROL | <span>BIG DADDY SIK MIX</span></div>
-  <div id="sr">v1.2.2 • DABBING PUG PRODUCTIONS • MISS RUBY WORLDWIDE LLC</div>
+  <div id="sr">v1.3.1 • DABBING PUG PRODUCTIONS • MISS RUBY WORLDWIDE LLC</div>
 </div>
 
 <!-- STARTUP MODAL -->
@@ -459,12 +509,14 @@ body {
     <div id="startup-time" id="s-clock">--:--:-- --</div>
     <div id="startup-date" id="s-date">--</div>
     <div id="startup-msg">
-      Your drops from last session are ready to load.<br>
-      Click below to grant access and<br>
-      <span>let's run the Mojo Call!</span>
+      <span>Quick Start:</span><br><br>
+      1️⃣ Click the flashing<br>
+      <span>SELECT MOJO AUDIO FOLDER</span> button<br><br>
+      2️⃣ Pick your drops folder<br><br>
+      3️⃣ Click <span>RELOAD</span> to load your audio<br><br>
+      Then you're ready to run the Mojo Call!
     </div>
     <div id="startup-go" onclick="startupGo()">🎙 LET'S GO!</div>
-    <div id="startup-diff" onclick="startupDiff()">Use a different drops folder</div>
   </div>
 </div>
 
@@ -608,40 +660,14 @@ function updateStartupClock(){
 setInterval(updateStartupClock,1000);
 updateStartupClock();
 
-async function startupGo(){
-  const overlay=document.getElementById("startup-overlay");
-  const btn=document.getElementById("startup-go");
-  btn.textContent="⏳ LOADING...";
-  btn.style.opacity="0.7";
-  
-  // Try saved handle first
-  try{
-    const handle = await getHandleFromIDB();
-    if(handle){
-      const perm = await handle.requestPermission({mode:"readwrite"});
-      if(perm==="granted"){
-        dirHandle=handle;
-        const fn=document.getElementById("folder-name");
-        const fs=document.getElementById("folder-status");
-        if(fn)fn.textContent=handle.name;
-        if(fs)fs.innerHTML="📁 <span>"+handle.name+"</span> — Loaded!";
-        await loadFromFolder();
-        overlay.style.display="none";
-        return;
-      }
-    }
-  }catch(e){ console.log("IDB restore failed:",e); }
-  
-  // No saved handle — open folder picker
-  overlay.style.display="none";
-  await selectFolder();
+function startupGo(){
+  // Just close the splash — board handles the rest
+  document.getElementById("startup-overlay").style.display="none";
+  // Start flashing the SELECT DROPS FOLDER button
+  startFolderPulse();
 }
 
-async function startupDiff(){
-  const overlay=document.getElementById("startup-overlay");
-  overlay.style.display="none";
-  await selectFolder();
-}
+
 
 // ══ IndexedDB for folder handle persistence ══
 async function saveHandleToIDB(handle){
@@ -672,6 +698,34 @@ async function getHandleFromIDB(){
     };
     req.onerror=()=>resolve(null);
   });
+}
+
+function startFolderPulse(){
+  const fb=document.getElementById("folder-btn");
+  const ra=document.getElementById("reload-arrow");
+  if(fb) fb.classList.add("folder-pulse");
+  if(ra) ra.style.display="none";
+}
+
+function folderSelected(){
+  const fb=document.getElementById("folder-btn");
+  const fi=document.getElementById("folder-btn-inner");
+  const fa=document.getElementById("folder-arrow");
+  const rb=document.getElementById("reload-btn");
+  const ra=document.getElementById("reload-arrow");
+  if(fb){ fb.classList.remove("folder-pulse"); fb.classList.add("folder-done"); }
+  if(fi){ fi.textContent="✅ FOLDER SELECTED"; }
+  if(fa) fa.style.display="none";
+  if(rb) rb.classList.add("reload-pulse");
+  if(ra) ra.style.display="inline";
+}
+
+function reloadDone(){
+  // Stop all pulsing
+  const rb=document.getElementById("reload-btn");
+  const ra=document.getElementById("reload-arrow");
+  if(rb) rb.classList.remove("reload-pulse");
+  if(ra) ra.style.display="none";
 }
 
 async function restoreFolder(){
@@ -721,7 +775,9 @@ async function selectFolder(){
     document.getElementById("folder-name").textContent = name;
     document.getElementById("folder-status").innerHTML = "📁 Drops folder: <span>"+name+"</span>";
     await saveHandleToIDB(dirHandle);
+    folderSelected();
     await loadFromFolder();
+    reloadDone();
   }catch(e){
     if(e.name !== "AbortError") alert("Could not access folder: "+e.message);
   }
@@ -782,7 +838,8 @@ async function loadFromFolder(){
     
     const count = Math.min(files.length, TOTAL);
     document.getElementById("folder-status").innerHTML = 
-      "📁 <span>"+dirHandle.name+"</span> — "+count+" files loaded";
+      "📁 <span>"+dirHandle.name+"</span> — "+count+" files loaded ✅";
+    reloadDone();
     renderCarts();
   }catch(e){
     document.getElementById("folder-status").innerHTML = 
