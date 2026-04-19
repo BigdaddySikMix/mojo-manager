@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>A1 Mojo Manager v1.2</title>
+<title>A1 Mojo Manager v1.4</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Share+Tech+Mono&family=Rajdhani:wght@600;700&display=swap');
 
@@ -90,8 +90,13 @@ body {
 #clock-date { font-size:13px;color:var(--grey2);letter-spacing:2px;margin-top:3px;font-family:"Bebas Neue",sans-serif; }
 
 #hdr-right { margin-left:auto;text-align:right; }
-#bdm-lbl { font-family:"Bebas Neue",sans-serif;font-size:11px;color:var(--grey2);letter-spacing:3px; }
-#ver-lbl { font-size:7px;color:var(--grey);letter-spacing:1px;margin-top:2px; }
+#bdm-lbl { font-family:"Bebas Neue",sans-serif;font-size:13px;color:var(--grey2);letter-spacing:3px; }
+#ver-lbl { 
+  font-family:"Bebas Neue",sans-serif;
+  font-size:14px;color:var(--gold);letter-spacing:2px;margin-top:2px;
+  background:#1a1000;border:1px solid var(--gold-dim, #7a6000);
+  border-radius:2px;padding:2px 6px;display:inline-block;
+}
 
 /* FOLDER STATUS */
 #folder-bar {
@@ -101,43 +106,26 @@ body {
 #folder-status { font-size:9px;color:var(--grey2);letter-spacing:1px;flex:1; }
 #folder-status span { color:var(--green); }
 #folder-btn {
-  padding:6px 0;background:var(--inset);border:2px solid var(--border);
-  border-radius:2px;color:var(--grey2);font-family:"Bebas Neue",sans-serif;
-  font-size:13px;letter-spacing:2px;cursor:pointer;transition:border-color 0.1s,box-shadow 0.1s;
-  width:220px;overflow:hidden;white-space:nowrap;position:relative;
-}
-#folder-btn:hover { border-color:var(--green);color:var(--green); }
-#folder-btn-inner {
-  display:inline-block;
-  padding-left:100%;
-  animation:marquee 4s linear infinite;
+  padding:8px 18px;background:var(--inset);border:2px solid var(--border);
+  border-radius:3px;color:var(--grey2);font-family:"Bebas Neue",sans-serif;
+  font-size:14px;letter-spacing:2px;cursor:pointer;transition:all 0.15s;
   white-space:nowrap;
 }
-@keyframes marquee {
-  0% { transform:translateX(0); }
-  100% { transform:translateX(-100%); }
-}
+#folder-btn:hover { border-color:var(--green);color:var(--green); }
 #folder-btn.folder-pulse {
-  border-color:var(--gold);
-  box-shadow:0 0 12px rgba(245,196,0,0.6);
+  background:#ffdd00;
+  border-color:#ffdd00;
+  color:#0000cc;
+  animation:yellowpulse 0.7s infinite;
+  box-shadow:0 0 16px rgba(255,220,0,0.8);
 }
-#folder-btn.folder-pulse #folder-btn-inner {
-  color:var(--gold);
-  animation:marquee 3s linear infinite, textpulse 0.8s infinite;
-}
-@keyframes textpulse {
-  0%,100% { color:var(--gold); }
-  50% { color:#fff; }
+@keyframes yellowpulse {
+  0%,100% { background:#ffdd00;color:#0000cc;box-shadow:0 0 16px rgba(255,220,0,0.8); }
+  50% { background:#fff500;color:#000099;box-shadow:0 0 28px rgba(255,220,0,1); }
 }
 #folder-btn.folder-done {
-  border-color:#333;box-shadow:none;
-  overflow:visible;
-}
-#folder-btn.folder-done #folder-btn-inner {
-  color:var(--grey2);
-  animation:none !important;
-  padding-left:8px;
-  display:block;
+  background:var(--inset);border-color:#333;
+  color:var(--green);animation:none;box-shadow:none;
 }
 .step-arrow {
   font-size:18px;animation:arrowbounce 0.6s infinite alternate;
@@ -446,9 +434,7 @@ body {
 <div id="folder-bar">
   <div id="folder-status">📁 <span id="folder-name">No folder selected — follow the steps above!</span></div>
   <div id="folder-arrow" class="step-arrow">👉</div>
-  <div id="folder-btn" onclick="selectFolder()" class="folder-pulse">
-    <span id="folder-btn-inner">📁 SELECT MOJO AUDIO FOLDER &nbsp;&nbsp;&nbsp; 📁 SELECT MOJO AUDIO FOLDER &nbsp;&nbsp;&nbsp;</span>
-  </div>
+  <div id="folder-btn" onclick="selectFolder()" class="folder-pulse">📁 SELECT MOJO AUDIO FOLDER</div>
   <div id="reload-arrow" class="step-arrow" style="display:none">👉</div>
   <div id="reload-btn" onclick="loadFromFolder()">↺ RELOAD</div>
 </div>
@@ -499,7 +485,7 @@ body {
 <!-- STATUS BAR -->
 <div id="statusbar">
   <div id="sl">A1 MOJO MANAGER | <span>A1 GARAGE DOOR SERVICE</span> | MORNING CALL CONTROL | <span>BIG DADDY SIK MIX</span></div>
-  <div id="sr">v1.3.2 • DABBING PUG PRODUCTIONS • MISS RUBY WORLDWIDE LLC</div>
+  <div id="sr">v1.4 • DABBING PUG PRODUCTIONS • MISS RUBY WORLDWIDE LLC</div>
 </div>
 
 <!-- STARTUP MODAL -->
@@ -512,11 +498,13 @@ body {
     <div id="startup-date" id="s-date">--</div>
     <div id="startup-msg">
       <span>Quick Start:</span><br><br>
-      1️⃣ Click the flashing<br>
-      <span>SELECT MOJO AUDIO FOLDER</span> button<br><br>
-      2️⃣ Pick your drops folder<br><br>
-      3️⃣ Click <span>RELOAD</span> to load your audio<br><br>
-      Then you're ready to run the Mojo Call!
+      1️⃣ On the next screen look for the<br>
+      <span>flashing yellow button</span><br>
+      and click it to select your audio folder<br><br>
+      2️⃣ Pick your <span>MOJO Audio folder</span><br><br>
+      3️⃣ Click the <span>RELOAD</span> button<br>
+      to load your audio<br><br>
+      You're ready to run the Mojo Call! 🎙️
     </div>
     <div id="startup-go" onclick="startupGo()">🎙 LET'S GO!</div>
   </div>
@@ -711,12 +699,14 @@ function startFolderPulse(){
 
 function folderSelected(){
   const fb=document.getElementById("folder-btn");
-  const fi=document.getElementById("folder-btn-inner");
   const fa=document.getElementById("folder-arrow");
   const rb=document.getElementById("reload-btn");
   const ra=document.getElementById("reload-arrow");
-  if(fb){ fb.classList.remove("folder-pulse"); fb.classList.add("folder-done"); }
-  if(fi){ fi.textContent="✅ FOLDER SELECTED"; }
+  if(fb){ 
+    fb.classList.remove("folder-pulse"); 
+    fb.classList.add("folder-done"); 
+    fb.textContent="✅ FOLDER SELECTED";
+  }
   if(fa) fa.style.display="none";
   if(rb) rb.classList.add("reload-pulse");
   if(ra) ra.style.display="inline";
