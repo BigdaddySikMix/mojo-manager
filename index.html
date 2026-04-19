@@ -124,8 +124,11 @@ body {
   50% { background:#fff500;color:#000099;box-shadow:0 0 28px rgba(255,220,0,1); }
 }
 #folder-btn.folder-done {
-  background:var(--inset);border-color:#333;
-  color:var(--green);animation:none;box-shadow:none;
+  background:var(--inset) !important;
+  border:2px solid #333 !important;
+  color:var(--green) !important;
+  animation:none !important;
+  box-shadow:none !important;
 }
 .step-arrow {
   font-size:18px;animation:arrowbounce 0.6s infinite alternate;
@@ -426,7 +429,7 @@ body {
 
   <div id="hdr-right">
     <div id="bdm-lbl">BIG DADDY SIK MIX</div>
-    <div id="ver-lbl">MISS RUBY WORLDWIDE LLC • v1.4</div>
+    <div id="ver-lbl">MISS RUBY WORLDWIDE LLC • v1.4.2</div>
   </div>
 </div>
 
@@ -485,7 +488,7 @@ body {
 <!-- STATUS BAR -->
 <div id="statusbar">
   <div id="sl">A1 MOJO MANAGER | <span>A1 GARAGE DOOR SERVICE</span> | MORNING CALL CONTROL | <span>BIG DADDY SIK MIX</span></div>
-  <div id="sr">v1.4.1 • DABBING PUG PRODUCTIONS • MISS RUBY WORLDWIDE LLC</div>
+  <div id="sr">v1.4.3 • DABBING PUG PRODUCTIONS • MISS RUBY WORLDWIDE LLC</div>
 </div>
 
 <!-- STARTUP MODAL -->
@@ -498,13 +501,12 @@ body {
     <div id="startup-date" id="s-date">--</div>
     <div id="startup-msg">
       <span>Quick Start:</span><br><br>
-      1️⃣ On the next screen look for the<br>
-      <span>flashing yellow button</span><br>
-      and click it to select your audio folder<br><br>
-      2️⃣ Pick your <span>MOJO Audio folder</span><br><br>
-      3️⃣ Click the <span>RELOAD</span> button<br>
-      to load your audio<br><br>
-      You're ready to run the Mojo Call! 🎙️
+      1️⃣ Click the <span>flashing yellow button</span><br>
+      to select your MOJO Audio folder<br><br>
+      2️⃣ If a warning popup appears —<br>
+      just click <span>OK</span> to dismiss it<br><br>
+      3️⃣ Click <span>↺ RELOAD</span> to load your audio<br><br>
+      🎙️ You're ready to run the Mojo Call!
     </div>
     <div id="startup-go" onclick="startupGo()">🎙 LET'S GO!</div>
   </div>
@@ -703,11 +705,10 @@ function folderSelected(){
   const rb=document.getElementById("reload-btn");
   const ra=document.getElementById("reload-arrow");
   if(fb){
-    // Force stop all animation directly
-    fb.className="";
-    fb.style.cssText="padding:8px 18px;background:#1a1a1a;border:2px solid #333;border-radius:3px;color:#00cc44;font-family:Bebas Neue,sans-serif;font-size:14px;letter-spacing:2px;cursor:pointer;white-space:nowrap;animation:none;box-shadow:none;";
+    fb.className="folder-done";
+    fb.removeAttribute("style");
     fb.textContent="✅ AUDIO FOLDER SET";
-    fb.onclick=null; // Disable clicking again
+    fb.onclick=()=>{};
   }
   if(fa) fa.style.display="none";
   if(rb) rb.classList.add("reload-pulse");
