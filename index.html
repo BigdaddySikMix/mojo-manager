@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>A1 Mojo Manager v1.4</title>
+<title>A1 Mojo Manager v1.5</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Share+Tech+Mono&family=Rajdhani:wght@600;700&display=swap');
 
@@ -463,8 +463,10 @@ body {
 
     <div id="meeting-box">
       <div id="meet-title">📅 MOJO CALL</div>
+      <div style="font-size:8px;color:#555;letter-spacing:2px;margin-bottom:2px;font-family:Share Tech Mono,monospace;">TIME TILL MOJO</div>
       <div id="meet-countdown">-- : -- to call</div>
       <div id="join-btn" onclick="joinMeeting()">JOIN MEETING</div>
+      <div id="yt-open-btn" onclick="window.open('https://www.youtube.com','_blank')" style="width:100%;padding:6px;background:#1a0000;border:1px solid #550000;border-radius:3px;color:#ff4444;font-family:Bebas Neue,sans-serif;font-size:14px;letter-spacing:3px;cursor:pointer;text-align:center;margin-top:5px;transition:all 0.1s;" onmouseover="this.style.background='#2a0000'" onmouseout="this.style.background='#1a0000'">▶ OPEN YOUTUBE</div>
       <div style="font-size:8px;color:#666;margin-bottom:3px;letter-spacing:1px;">TEAMS MEETING LINK:</div>
       <input type="text" id="meet-link" placeholder="Paste your Teams meeting link here..." oninput="saveMeetLink()">
       <div id="meet-time-row">
@@ -488,7 +490,7 @@ body {
 <!-- STATUS BAR -->
 <div id="statusbar">
   <div id="sl">A1 MOJO MANAGER | <span>A1 GARAGE DOOR SERVICE</span> | MORNING CALL CONTROL | <span>BIG DADDY SIK MIX</span></div>
-  <div id="sr">v1.4.4 • DABBING PUG PRODUCTIONS • MISS RUBY WORLDWIDE LLC</div>
+  <div id="sr">v1.5 • DABBING PUG PRODUCTIONS • MISS RUBY WORLDWIDE LLC</div>
 </div>
 
 <!-- STARTUP MODAL -->
@@ -762,6 +764,21 @@ async function restoreFolder(){
   }catch(e){ console.log("Restore folder error:",e); }
 }
 
+function setFolderBtnDone(){
+  const fb=document.getElementById("folder-btn");
+  if(fb){
+    fb.style.animation="none";
+    fb.style.background="#1a1a1a";
+    fb.style.border="2px solid #333";
+    fb.style.color="#00cc44";
+    fb.style.boxShadow="none";
+    fb.innerHTML="✅ AUDIO FOLDER SET";
+    fb.onclick=null;
+  }
+  const fa=document.getElementById("folder-arrow");
+  if(fa) fa.style.display="none";
+}
+
 async function selectFolder(){
   try{
     dirHandle = await window.showDirectoryPicker({mode:"readwrite"});
@@ -853,6 +870,7 @@ async function loadFromFolder(){
     document.getElementById("folder-status").innerHTML = 
       "📁 <span>"+dirHandle.name+"</span> — "+count+" files loaded ✅";
     reloadDone();
+    setFolderBtnDone();
     renderCarts();
   }catch(e){
     document.getElementById("folder-status").innerHTML = 
