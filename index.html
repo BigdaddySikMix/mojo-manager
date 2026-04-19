@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>A1 Mojo Manager</title>
+<title>A1 Mojo Manager v1.1</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Share+Tech+Mono&family=Rajdhani:wght@600;700&display=swap');
 
@@ -87,7 +87,7 @@ body {
 /* CLOCK */
 #clock-wrap { text-align:center; }
 #clock { font-size:20px;color:var(--offwhite);letter-spacing:3px;font-family:"Share Tech Mono",monospace; }
-#clock-date { font-size:8px;color:var(--grey);letter-spacing:1px;margin-top:2px; }
+#clock-date { font-size:13px;color:var(--grey2);letter-spacing:2px;margin-top:3px;font-family:"Bebas Neue",sans-serif; }
 
 #hdr-right { margin-left:auto;text-align:right; }
 #bdm-lbl { font-family:"Bebas Neue",sans-serif;font-size:11px;color:var(--grey2);letter-spacing:3px; }
@@ -338,7 +338,7 @@ body {
 
   <div id="hdr-right">
     <div id="bdm-lbl">BIG DADDY SIK MIX</div>
-    <div id="ver-lbl">MISS RUBY WORLDWIDE LLC • v1.0</div>
+    <div id="ver-lbl">MISS RUBY WORLDWIDE LLC • v1.1</div>
   </div>
 </div>
 
@@ -395,7 +395,7 @@ body {
 <!-- STATUS BAR -->
 <div id="statusbar">
   <div id="sl">A1 MOJO MANAGER | <span>A1 GARAGE DOOR SERVICE</span> | MORNING CALL CONTROL | <span>BIG DADDY SIK MIX</span></div>
-  <div id="sr">v1.0 • DABBING PUG PRODUCTIONS • MISS RUBY WORLDWIDE LLC</div>
+  <div id="sr">v1.1 • DABBING PUG PRODUCTIONS • MISS RUBY WORLDWIDE LLC</div>
 </div>
 
 <script>
@@ -457,24 +457,25 @@ function updateCountdown(){
     const diff=(meet-now)/1000;
     const cd=document.getElementById("meet-countdown");
     const jb=document.getElementById("join-btn");
-    if(diff>-3600&&diff<=0){
-      cd.textContent="IN SESSION NOW!";
-      cd.className="now";
-      jb.classList.add("pulse");
-    } else if(diff<0){
-      cd.textContent="CALL COMPLETE";
+    if(diff<=0){
+      cd.textContent="00:00";
       cd.className="";
       jb.classList.remove("pulse");
     } else if(diff<600){
       const mins=Math.floor(diff/60);
       const secs=Math.floor(diff%60);
-      cd.textContent=mins+"m "+String(secs).padStart(2,"0")+"s TO CALL";
+      cd.textContent=String(mins).padStart(2,"0")+":"+String(secs).padStart(2,"0");
       cd.className="soon";
       jb.classList.add("pulse");
     } else {
       const hrs=Math.floor(diff/3600);
       const mins=Math.floor((diff%3600)/60);
-      cd.textContent=hrs>0?hrs+"h "+mins+"m to call":mins+" min to call";
+      const secs=Math.floor(diff%60);
+      if(hrs>0){
+        cd.textContent=hrs+"h "+String(mins).padStart(2,"0")+"m";
+      } else {
+        cd.textContent=String(mins).padStart(2,"0")+":"+String(secs).padStart(2,"0");
+      }
       cd.className="";
       jb.classList.remove("pulse");
     }
@@ -524,16 +525,74 @@ const carts = Array(TOTAL).fill(null).map((_,i)=>({
 let curPage=0;
 
 // Try to restore saved folder
+// ══ IndexedDB for folder handle persistence ══
+async function saveHandleToIDB(handle){
+  return new Promise((resolve,reject)=>{
+    const req=indexedDB.open("a1mojo",1);
+    req.onupgradeneeded=e=>e.target.result.createObjectStore("handles");
+    req.onsuccess=e=>{
+      const db=e.target.result;
+      const tx=db.transaction("handles","readwrite");
+      tx.objectStore("handles").put(handle,"dirHandle");
+      tx.oncomplete=()=>resolve();
+      tx.onerror=()=>reject();
+    };
+    req.onerror=()=>reject();
+  });
+}
+
+async function getHandleFromIDB(){
+  return new Promise((resolve,reject)=>{
+    const req=indexedDB.open("a1mojo",1);
+    req.onupgradeneeded=e=>e.target.result.createObjectStore("handles");
+    req.onsuccess=e=>{
+      const db=e.target.result;
+      const tx=db.transaction("handles","readonly");
+      const getReq=tx.objectStore("handles").get("dirHandle");
+      getReq.onsuccess=()=>resolve(getReq.result);
+      getReq.onerror=()=>resolve(null);
+    };
+    req.onerror=()=>resolve(null);
+  });
+}
+
 async function restoreFolder(){
   try{
-    const saved = localStorage.getItem("a1mojo_folder_name");
-    if(saved){
-      const fn = document.getElementById("folder-name");
-      const fs = document.getElementById("folder-status");
-      if(fn) fn.textContent = saved;
-      if(fs) fs.innerHTML = "📁 <span>"+saved+"</span> — Click RELOAD to refresh files";
+    const handle = await getHandleFromIDB();
+    if(handle){
+      // Verify permission
+      const perm = await handle.queryPermission({mode:"readwrite"});
+      if(perm==="granted"){
+        dirHandle=handle;
+        const fn=document.getElementById("folder-name");
+        const fs=document.getElementById("folder-status");
+        if(fn)fn.textContent=handle.name;
+        if(fs)fs.innerHTML="📁 <span>"+handle.name+"</span> — Auto-loaded!";
+        await loadFromFolder();
+        return;
+      } else if(perm==="prompt"){
+        // Request permission silently
+        const newPerm = await handle.requestPermission({mode:"readwrite"});
+        if(newPerm==="granted"){
+          dirHandle=handle;
+          const fn=document.getElementById("folder-name");
+          const fs=document.getElementById("folder-status");
+          if(fn)fn.textContent=handle.name;
+          if(fs)fs.innerHTML="📁 <span>"+handle.name+"</span> — Auto-loaded!";
+          await loadFromFolder();
+          return;
+        }
+      }
     }
-  }catch(e){ console.log("Restore folder error:", e); }
+    // Fall back to showing last known name
+    const saved=localStorage.getItem("a1mojo_folder_name");
+    if(saved){
+      const fn=document.getElementById("folder-name");
+      const fs=document.getElementById("folder-status");
+      if(fn)fn.textContent=saved;
+      if(fs)fs.innerHTML="📁 <span>"+saved+"</span> — Click RELOAD to refresh";
+    }
+  }catch(e){ console.log("Restore folder error:",e); }
 }
 
 async function selectFolder(){
@@ -543,6 +602,7 @@ async function selectFolder(){
     localStorage.setItem("a1mojo_folder_name", name);
     document.getElementById("folder-name").textContent = name;
     document.getElementById("folder-status").innerHTML = "📁 Drops folder: <span>"+name+"</span>";
+    await saveHandleToIDB(dirHandle);
     await loadFromFolder();
   }catch(e){
     if(e.name !== "AbortError") alert("Could not access folder: "+e.message);
