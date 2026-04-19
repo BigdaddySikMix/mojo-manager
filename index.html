@@ -728,6 +728,22 @@ async function selectFolder(){
 }
 
 async function loadFromFolder(){
+  // If no dirHandle in memory, try to restore from IDB
+  if(!dirHandle){
+    try{
+      const handle = await getHandleFromIDB();
+      if(handle){
+        const perm = await handle.requestPermission({mode:"readwrite"});
+        if(perm==="granted"){
+          dirHandle=handle;
+          const fn=document.getElementById("folder-name");
+          const fs=document.getElementById("folder-status");
+          if(fn)fn.textContent=handle.name;
+          if(fs)fs.innerHTML="📁 <span>"+handle.name+"</span> — Reloading...";
+        }
+      }
+    }catch(e){ console.log("Reload restore error:",e); }
+  }
   if(!dirHandle){
     document.getElementById("folder-status").innerHTML = "📁 <span style='color:#cc4444'>No folder selected — click SELECT DROPS FOLDER</span>";
     return;
