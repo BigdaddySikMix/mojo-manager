@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>A1 Mojo Manager v1.5</title>
+<title>A1 Mojo Manager v1.6</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Share+Tech+Mono&family=Rajdhani:wght@600;700&display=swap');
 
@@ -490,7 +490,7 @@ body {
 <!-- STATUS BAR -->
 <div id="statusbar">
   <div id="sl">A1 MOJO MANAGER | <span>A1 GARAGE DOOR SERVICE</span> | MORNING CALL CONTROL | <span>BIG DADDY SIK MIX</span></div>
-  <div id="sr">v1.5 • DABBING PUG PRODUCTIONS • MISS RUBY WORLDWIDE LLC</div>
+  <div id="sr">v1.6 • DABBING PUG PRODUCTIONS • MISS RUBY WORLDWIDE LLC</div>
 </div>
 
 <!-- STARTUP MODAL -->
@@ -813,6 +813,19 @@ async function selectFolder(){
   }
 }
 
+// Save slot assignments to localStorage
+function saveSlotAssignments(){
+  const assignments = carts.map(c => c.name ? {name:c.name, auto:c.auto} : null);
+  try{ localStorage.setItem("a1mojo_slots", JSON.stringify(assignments)); }catch(e){}
+}
+
+function getSavedSlots(){
+  try{
+    const s = localStorage.getItem("a1mojo_slots");
+    return s ? JSON.parse(s) : null;
+  }catch(e){ return null; }
+}
+
 async function loadFromFolder(){
   // If no dirHandle in memory, try to restore from IDB
   if(!dirHandle){
@@ -844,31 +857,71 @@ async function loadFromFolder(){
       }
     }
     files.sort((a,b)=>a.name.localeCompare(b.name));
-    
-    // Assign to slots
-    for(let i=0;i<TOTAL;i++){
-      if(i < files.length){
-        const fh = files[i];
-        const file = await fh.getFile();
-        const url = URL.createObjectURL(file);
-        carts[i].name = fh.name.replace(/\.[^/.]+$/,"");
-        carts[i].file = url;
-        carts[i].fileHandle = fh;
-        // Get duration
-        const tmpAudio = new Audio(url);
-        tmpAudio.addEventListener("loadedmetadata", ()=>{
-          carts[i].duration = tmpAudio.duration;
-        });
-      } else {
-        carts[i].name = null;
-        carts[i].file = null;
-        carts[i].fileHandle = null;
+
+    // Build filename map
+    const fileMap = {};
+    for(const fh of files){
+      const nameNoExt = fh.name.replace(/\.[^/.]+$/,"");
+      fileMap[nameNoExt] = fh;
+    }
+
+    const savedSlots = getSavedSlots();
+    const usedNames = new Set();
+
+    if(savedSlots){
+      // Restore saved slot order
+      for(let i=0;i<TOTAL;i++){
+        const saved = savedSlots[i];
+        if(saved && saved.name && fileMap[saved.name]){
+          const fh = fileMap[saved.name];
+          const file = await fh.getFile();
+          const url = URL.createObjectURL(file);
+          carts[i].name = saved.name;
+          carts[i].file = url;
+          carts[i].fileHandle = fh;
+          carts[i].auto = saved.auto||false;
+          usedNames.add(saved.name);
+          const tmp=new Audio(url);
+          tmp.addEventListener("loadedmetadata",()=>{carts[i].duration=tmp.duration;});
+        } else {
+          carts[i].name=null;carts[i].file=null;carts[i].fileHandle=null;
+        }
+      }
+      // Fill empty slots with new files
+      const newFiles=Object.keys(fileMap).filter(n=>!usedNames.has(n)).sort();
+      let ni=0;
+      for(let i=0;i<TOTAL&&ni<newFiles.length;i++){
+        if(!carts[i].file){
+          const name=newFiles[ni++];
+          const fh=fileMap[name];
+          const file=await fh.getFile();
+          const url=URL.createObjectURL(file);
+          carts[i].name=name;carts[i].file=url;carts[i].fileHandle=fh;
+          const tmp=new Audio(url);
+          tmp.addEventListener("loadedmetadata",()=>{carts[i].duration=tmp.duration;});
+        }
+      }
+    } else {
+      // No saved order - load alphabetically
+      for(let i=0;i<TOTAL;i++){
+        if(i<files.length){
+          const fh=files[i];
+          const file=await fh.getFile();
+          const url=URL.createObjectURL(file);
+          carts[i].name=fh.name.replace(/\.[^/.]+$/,"");
+          carts[i].file=url;carts[i].fileHandle=fh;
+          const tmp=new Audio(url);
+          tmp.addEventListener("loadedmetadata",()=>{carts[i].duration=tmp.duration;});
+        } else {
+          carts[i].name=null;carts[i].file=null;carts[i].fileHandle=null;
+        }
       }
     }
-    
+
     const count = Math.min(files.length, TOTAL);
     document.getElementById("folder-status").innerHTML = 
       "📁 <span>"+dirHandle.name+"</span> — "+count+" files loaded ✅";
+    saveSlotAssignments();
     reloadDone();
     setFolderBtnDone();
     renderCarts();
@@ -1045,6 +1098,7 @@ async function assignFile(idx,file,fh){
   // Get duration
   const tmp=new Audio(url);
   tmp.addEventListener("loadedmetadata",()=>{ carts[idx].duration=tmp.duration; });
+  saveSlotAssignments();
   updateSlot(idx);
   const nd=document.getElementById("name-"+idx);
   if(nd){ nd.className="track-name loaded"; nd.textContent=carts[idx].name; }
@@ -1118,6 +1172,7 @@ function toggleAuto(idx){
   carts[idx].auto=!carts[idx].auto;
   const sw=document.getElementById("auto-"+idx);
   if(sw)sw.classList.toggle("on",carts[idx].auto);
+  saveSlotAssignments();
 }
 
 // ══ INIT ══
