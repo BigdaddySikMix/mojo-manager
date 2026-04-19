@@ -488,7 +488,7 @@ body {
 <!-- STATUS BAR -->
 <div id="statusbar">
   <div id="sl">A1 MOJO MANAGER | <span>A1 GARAGE DOOR SERVICE</span> | MORNING CALL CONTROL | <span>BIG DADDY SIK MIX</span></div>
-  <div id="sr">v1.4.3 • DABBING PUG PRODUCTIONS • MISS RUBY WORLDWIDE LLC</div>
+  <div id="sr">v1.4.4 • DABBING PUG PRODUCTIONS • MISS RUBY WORLDWIDE LLC</div>
 </div>
 
 <!-- STARTUP MODAL -->
@@ -767,14 +767,32 @@ async function selectFolder(){
     dirHandle = await window.showDirectoryPicker({mode:"readwrite"});
     const name = dirHandle.name;
     localStorage.setItem("a1mojo_folder_name", name);
-    document.getElementById("folder-name").textContent = name;
-    document.getElementById("folder-status").innerHTML = "📁 Drops folder: <span>"+name+"</span>";
+    // Update folder name display
+    const fn=document.getElementById("folder-name");
+    if(fn) fn.textContent = name;
     await saveHandleToIDB(dirHandle);
-    folderSelected();
+    // Change button IMMEDIATELY before anything else
+    const fb=document.getElementById("folder-btn");
+    if(fb){
+      fb.style.animation="none";
+      fb.style.background="#1a1a1a";
+      fb.style.border="2px solid #333";
+      fb.style.color="#00cc44";
+      fb.style.boxShadow="none";
+      fb.innerHTML="✅ AUDIO FOLDER SET";
+      fb.onclick=null;
+    }
+    const fa=document.getElementById("folder-arrow");
+    if(fa) fa.style.display="none";
+    const rb=document.getElementById("reload-btn");
+    if(rb) rb.style.borderColor="#ffaa00";
+    const ra=document.getElementById("reload-arrow");
+    if(ra) ra.style.display="inline";
+    // Now load files
     await loadFromFolder();
     reloadDone();
   }catch(e){
-    if(e.name !== "AbortError") alert("Could not access folder: "+e.message);
+    console.log("Folder error:", e.message);
   }
 }
 
