@@ -447,7 +447,7 @@ body {
 <!-- STATUS BAR -->
 <div id="statusbar">
   <div id="sl">A1 MOJO MANAGER | <span>A1 GARAGE DOOR SERVICE</span> | MORNING CALL CONTROL | <span>BIG DADDY SIK MIX</span></div>
-  <div id="sr">v1.2 • DABBING PUG PRODUCTIONS • MISS RUBY WORLDWIDE LLC</div>
+  <div id="sr">v1.2.1 • DABBING PUG PRODUCTIONS • MISS RUBY WORLDWIDE LLC</div>
 </div>
 
 <!-- STARTUP MODAL -->
@@ -609,13 +609,32 @@ setInterval(updateStartupClock,1000);
 updateStartupClock();
 
 async function startupGo(){
-  // Try to restore saved folder
   const overlay=document.getElementById("startup-overlay");
   const btn=document.getElementById("startup-go");
   btn.textContent="⏳ LOADING...";
   btn.style.opacity="0.7";
-  await restoreFolder();
+  
+  // Try saved handle first
+  try{
+    const handle = await getHandleFromIDB();
+    if(handle){
+      const perm = await handle.requestPermission({mode:"readwrite"});
+      if(perm==="granted"){
+        dirHandle=handle;
+        const fn=document.getElementById("folder-name");
+        const fs=document.getElementById("folder-status");
+        if(fn)fn.textContent=handle.name;
+        if(fs)fs.innerHTML="📁 <span>"+handle.name+"</span> — Loaded!";
+        await loadFromFolder();
+        overlay.style.display="none";
+        return;
+      }
+    }
+  }catch(e){ console.log("IDB restore failed:",e); }
+  
+  // No saved handle — open folder picker
   overlay.style.display="none";
+  await selectFolder();
 }
 
 async function startupDiff(){
