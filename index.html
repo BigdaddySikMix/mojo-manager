@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>A1 Mojo Manager v1.6</title>
+<title>A1 Mojo Manager v1.6.2</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Share+Tech+Mono&family=Rajdhani:wght@600;700&display=swap');
 
@@ -176,7 +176,7 @@ body {
 .ctab.active { background:var(--panel2);color:var(--white);border-top:2px solid var(--red); }
 
 #cart-rack {
-  background:var(--panel2);border:1px solid var(--border);border-radius:0 3px 3px 3px;
+  background:#1a0000;border:1px solid #4a0000;border-radius:0 3px 3px 3px;
   padding:5px;display:flex;flex-direction:column;gap:4px;flex:1;overflow-y:auto;
 }
 #cart-rack::-webkit-scrollbar{width:5px;}
@@ -186,14 +186,14 @@ body {
 /* CART SLOT */
 .cslot {
   display:flex;align-items:center;gap:6px;
-  background:var(--inset);border:1px solid var(--border);border-radius:3px;
+  background:#200000;border:1px solid #3a0000;border-radius:3px;
   padding:5px 8px;height:46px;transition:border-color 0.15s,background 0.15s;
   position:relative;
 }
-.cslot.loaded { border-color:#2a1a1a; }
+.cslot.loaded { border-color:#7a0000; }
 .cslot.playing { border-color:var(--green);background:#0a1a0a;box-shadow:0 0 8px rgba(0,200,60,0.15); }
 .cslot.drag-over { border-color:var(--red2)!important;background:#150000; }
-.cslot:hover { border-color:#3a3a3a; }
+.cslot:hover { border-color:#5a0000; }
 
 /* PLAY button */
 .play-btn {
@@ -210,15 +210,15 @@ body {
   width:72px;height:24px;border-radius:2px;flex-shrink:0;
   display:flex;align-items:center;justify-content:center;
   font-family:"Bebas Neue",sans-serif;font-size:11px;letter-spacing:1px;
-  background:var(--inset);border:1px solid var(--border);color:#333;transition:all 0.15s;
+  background:#0f0000;border:1px solid #2a0000;color:#333;transition:all 0.15s;
 }
-.status-lbl.ready { color:var(--grey2);border-color:#333; }
+.status-lbl.ready { color:#cc0000;border-color:#5a0000; }
 .status-lbl.running {
-  background:#0a1a0a;border-color:var(--green);color:var(--green);
+  background:#1a0000;border-color:#ff2222;color:#ff2222;
   animation:runpulse 0.8s infinite;
 }
 @keyframes runpulse{0%,100%{opacity:1;}50%{opacity:0.5;}}
-.status-lbl.empty { color:#2a2a2a;border-color:#1e1e1e; }
+.status-lbl.empty { color:#2a0000;border-color:#1e0000; }
 
 /* TRACK NAME */
 .track-name {
@@ -227,31 +227,31 @@ body {
   overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
   color:var(--grey);cursor:pointer;
 }
-.track-name.loaded { color:var(--offwhite);font-size:13px; }
+.track-name.loaded { color:#ffffff;font-size:13px; }
 .track-name.empty { color:#2a2a2a;font-size:10px;font-style:italic; }
 
 /* COUNTDOWN */
 .countdown {
-  width:48px;height:24px;background:var(--inset);border:1px solid var(--border);
+  width:48px;height:24px;background:#0f0000;border:1px solid #2a0000;
   border-radius:2px;display:flex;align-items:center;justify-content:center;
   font-family:"Share Tech Mono",monospace;font-size:10px;color:#444;
   flex-shrink:0;transition:all 0.1s;
 }
-.countdown.running { color:var(--green);border-color:#2a4a2a; }
+.countdown.running { color:#ff2222;border-color:#7a0000; }
 
 /* PLAY NEXT */
-.pnext-wrap { display:flex;flex-direction:column;align-items:center;gap:1px;flex-shrink:0; }
-.pnext-lbl { font-size:6px;color:var(--grey);letter-spacing:0.5px;white-space:nowrap; }
+.pnext-wrap { display:flex;flex-direction:row;align-items:center;gap:5px;flex-shrink:0; }
+.pnext-lbl { font-family:"Bebas Neue",sans-serif;font-size:11px;letter-spacing:1px;white-space:nowrap;color:#cc0000; }
 .pnext-sw {
-  width:28px;height:14px;background:#0a0a0a;border:1px solid var(--border);
-  border-radius:7px;position:relative;cursor:pointer;transition:all 0.2s;
+  width:34px;height:18px;background:#0a0000;border:1px solid #2a0000;
+  border-radius:9px;position:relative;cursor:pointer;transition:all 0.2s;
 }
-.pnext-sw.on { background:#0a1a0a;border-color:var(--green); }
+.pnext-sw.on { background:#5a0000;border-color:#ff2222; }
 .pknob {
-  width:10px;height:10px;background:#2a2a2a;border-radius:50%;
-  position:absolute;top:1px;left:1px;transition:all 0.2s;
+  width:13px;height:13px;background:#4a1a1a;border-radius:50%;
+  position:absolute;top:2px;left:2px;transition:all 0.2s;
 }
-.pnext-sw.on .pknob { left:15px;background:var(--green); }
+.pnext-sw.on .pknob { left:17px;background:#ff2222; }
 
 /* STOP button */
 .stop-btn {
@@ -265,11 +265,11 @@ body {
 
 /* DELETE */
 .del-btn {
-  width:28px;height:32px;background:var(--inset);border:1px solid var(--border);
+  width:28px;height:32px;background:#1a0000;border:1px solid #881111;
   border-radius:2px;display:flex;align-items:center;justify-content:center;
-  font-size:13px;cursor:pointer;flex-shrink:0;transition:all 0.1s;color:var(--grey);
+  font-size:13px;cursor:pointer;flex-shrink:0;transition:all 0.1s;color:#ff3333;
 }
-.del-btn:hover { border-color:var(--red);color:var(--red); }
+.del-btn:hover { border-color:#ff3333;color:#ff6666; }
 
 /* ══ RIGHT PANEL ══ */
 #right-panel { width:195px;display:flex;flex-direction:column;gap:8px;flex-shrink:0; }
@@ -429,7 +429,7 @@ body {
 
   <div id="hdr-right">
     <div id="bdm-lbl">BIG DADDY SIK MIX</div>
-    <div id="ver-lbl">MISS RUBY WORLDWIDE LLC • v1.6</div>
+    <div id="ver-lbl">MISS RUBY WORLDWIDE LLC • v1.6.2</div>
   </div>
 </div>
 
