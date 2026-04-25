@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>A1 Mojo Manager v2.0.1</title>
+<title>A1 Mojo Manager v2.0.3</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Share+Tech+Mono&family=Rajdhani:wght@600;700&display=swap');
 :root {
@@ -126,7 +126,7 @@ body{background:var(--black);font-family:"Share Tech Mono",monospace;color:var(-
 .mch-stop.active{background:var(--red);border-color:var(--red2);color:#fff;box-shadow:0 0 6px rgba(255,48,48,0.35);}
 
 /* Fader */
-.mch-fader-wrap{flex:1;display:flex;align-items:center;gap:5px;min-width:80px;}
+.mch-fader-wrap{flex:0 0 auto;width:160px;display:flex;align-items:center;gap:5px;}
 .mch-fader{flex:1;-webkit-appearance:none;appearance:none;height:4px;
   background:#0a2a0a;border-radius:2px;outline:none;cursor:pointer;}
 .mch-fader::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;border-radius:50%;
@@ -182,18 +182,19 @@ body{background:var(--black);font-family:"Share Tech Mono",monospace;color:var(-
 
 /* SFX BUTTON — white outline so it's visible */
 .sfx-btn{background:#180000;border:1px solid #888888;border-radius:3px;
-  min-height:50px;display:flex;flex-direction:column;align-items:center;justify-content:center;
-  gap:2px;padding:4px 3px;cursor:pointer;transition:border-color 0.1s,background 0.1s;position:relative;}
+  min-height:58px;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:2px;padding:4px 3px 22px 3px;cursor:pointer;transition:border-color 0.1s,background 0.1s;position:relative;}
 .sfx-btn.loaded{border-color:#cccccc;}
 .sfx-btn.playing{border-color:var(--green);background:#0a1800;box-shadow:0 0 6px rgba(0,200,60,0.15);}
 .sfx-btn.empty-slot{border-color:#444444;border-style:dashed;}
 .sfx-btn.loaded:hover{border-color:#ffffff;background:#220000;}
 .sfx-btn.drag-over{border-color:var(--orange)!important;background:#150a00;}
 
-.sfx-slot-num{font-family:"Bebas Neue",sans-serif;font-size:8px;color:#666;
-  position:absolute;top:2px;left:4px;letter-spacing:1px;}
-.sfx-btn.loaded .sfx-slot-num{color:#994444;}
-.sfx-btn.playing .sfx-slot-num{color:var(--green);}
+.sfx-slot-num{font-family:"Bebas Neue",sans-serif;font-size:26px;color:#ffee55;
+  position:absolute;bottom:1px;left:5px;line-height:1;letter-spacing:1px;
+  cursor:grab;opacity:0.85;text-shadow:0 0 6px rgba(255,220,0,0.4);}
+.sfx-slot-num:active{cursor:grabbing;}
+.sfx-btn.playing .sfx-slot-num{color:#00ff55;opacity:1;}
 
 .sfx-dot{width:6px;height:6px;border-radius:50%;background:#333;flex-shrink:0;}
 .sfx-dot.ready{background:var(--red);}
@@ -236,7 +237,7 @@ body{background:var(--black);font-family:"Share Tech Mono",monospace;color:var(-
   <div id="startup-modal">
     <img id="startup-logo" src="https://bigdaddysikmix.github.io/mojo-manager/A1-logo.png" onerror="this.style.display='none'">
     <div id="startup-title">A1 MOJO MANAGER</div>
-    <div id="startup-sub">AREA MANAGER CONSOLE • v2.0.1</div>
+    <div id="startup-sub">AREA MANAGER CONSOLE • v2.0.3</div>
     <div id="startup-time">--:--:--</div>
     <div id="startup-date">LOADING...</div>
     <div id="startup-msg">
@@ -260,7 +261,7 @@ body{background:var(--black);font-family:"Share Tech Mono",monospace;color:var(-
   <div id="clock-wrap">
     <div id="clock">--:--:--</div>
     <div id="clock-date">...</div>
-    <div id="ver-lbl">MISS RUBY WORLDWIDE • v2.0.1</div>
+    <div id="ver-lbl">MISS RUBY WORLDWIDE • v2.0.3</div>
   </div>
 </div>
 
@@ -305,7 +306,7 @@ body{background:var(--black);font-family:"Share Tech Mono",monospace;color:var(-
 
 <!-- STATUS BAR -->
 <div id="statusbar">
-  <div id="sl">A1 MOJO MANAGER v2.0.1 • MISS RUBY WORLDWIDE LLC • BIG DADDY SIK MIX</div>
+  <div id="sl">A1 MOJO MANAGER v2.0.3 • MISS RUBY WORLDWIDE LLC • BIG DADDY SIK MIX</div>
   <div id="sr">DABBING PUG PRODUCTIONS</div>
 </div>
 
@@ -708,7 +709,10 @@ function stopCart(idx){
   if(idx<MUSIC_SLOTS&&c.fadeInterval){clearInterval(c.fadeInterval);c.fadeInterval=null;updateFadeBtn(idx,false);}
   if(c.audio){c.audio.pause();c.audio.currentTime=0;c.audio=null;}
   c.playing=false;updateCartUI(idx);
-  if(idx<MUSIC_SLOTS){const cdEl=document.getElementById("mchcd-"+idx);if(cdEl)cdEl.textContent="--:--";}
+  if(idx<MUSIC_SLOTS){
+    const cdEl=document.getElementById("mchcd-"+idx);if(cdEl)cdEl.textContent="--:--";
+    if(c.auto){const next=(idx+1)%MUSIC_SLOTS;if(carts[next].file)setTimeout(()=>fireCart(next),200);}
+  }
 }
 
 function triggerFade(idx){
@@ -733,6 +737,8 @@ function triggerFade(idx){
       if(pct2)pct2.textContent=Math.round(FADE_RESET_VOL*100)+"%";
       updateFadeBtn(idx,false);updateCartUI(idx);
       const cdEl=document.getElementById("mchcd-"+idx);if(cdEl)cdEl.textContent="--:--";
+      // Fire next if PN is on
+      if(ch.auto){const next=(idx+1)%MUSIC_SLOTS;if(carts[next].file)setTimeout(()=>fireCart(next),300);}
     }
   },stepTime);
 }
