@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>A1 Mojo Manager v1.6.2</title>
+<title>A1 Mojo Manager v1.6.3</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Share+Tech+Mono&family=Rajdhani:wght@600;700&display=swap');
 
@@ -391,6 +391,73 @@ body {
 }
 #startup-diff:hover { color:var(--grey2); }
 
+/* ══ MASTER CONTROL BAR ══ */
+#master-bar {
+  background:linear-gradient(180deg,#0d0000 0%,#0a0000 100%);
+  border-bottom:2px solid #3a0000;
+  padding:5px 14px;display:flex;align-items:center;gap:18px;flex-shrink:0;height:44px;
+}
+#master-lbl {
+  font-family:"Bebas Neue",sans-serif;font-size:15px;letter-spacing:4px;color:#cc0000;
+  flex-shrink:0;
+}
+#fader-group { display:flex;align-items:center;gap:8px;flex:1;max-width:340px; }
+#fader-pct {
+  font-family:"Share Tech Mono",monospace;font-size:12px;color:var(--green);
+  width:36px;text-align:right;flex-shrink:0;
+}
+#master-fader {
+  flex:1;-webkit-appearance:none;appearance:none;height:6px;
+  background:linear-gradient(to right,var(--green) 0%,var(--green) 100%,#1a1a1a 100%);
+  border-radius:3px;outline:none;cursor:pointer;
+}
+#master-fader::-webkit-slider-thumb {
+  -webkit-appearance:none;appearance:none;
+  width:18px;height:18px;border-radius:50%;
+  background:var(--green);border:2px solid var(--green2);
+  box-shadow:0 0 8px rgba(0,220,60,0.6);cursor:pointer;
+}
+#master-fader::-moz-range-thumb {
+  width:18px;height:18px;border-radius:50%;
+  background:var(--green);border:2px solid var(--green2);cursor:pointer;
+}
+#vol-lbl { font-family:"Bebas Neue",sans-serif;font-size:11px;color:var(--grey);letter-spacing:2px;flex-shrink:0; }
+
+/* FADE controls */
+#fade-group { display:flex;align-items:center;gap:5px;flex-shrink:0; }
+#fade-speed-lbl { font-family:"Bebas Neue",sans-serif;font-size:11px;color:var(--grey);letter-spacing:2px;margin-right:2px; }
+.fspd-btn {
+  padding:4px 10px;background:var(--inset);border:1px solid var(--border);
+  border-radius:2px;font-family:"Bebas Neue",sans-serif;font-size:12px;letter-spacing:1px;
+  color:var(--grey);cursor:pointer;transition:all 0.1s;
+}
+.fspd-btn:hover { border-color:#555;color:var(--offwhite); }
+.fspd-btn.sel { background:#1a0000;border-color:#cc4400;color:#ff6622; }
+#fade-btn {
+  padding:6px 14px;background:#1a0500;border:2px solid #cc4400;
+  border-radius:3px;font-family:"Bebas Neue",sans-serif;font-size:13px;letter-spacing:2px;
+  color:#ff6622;cursor:pointer;transition:all 0.15s;white-space:nowrap;
+}
+#fade-btn:hover { background:#cc4400;color:#fff;box-shadow:0 0 12px rgba(255,100,0,0.5); }
+#fade-btn.fading {
+  background:#cc4400;color:#fff;
+  animation:fadepulse 0.5s infinite;
+}
+@keyframes fadepulse{0%,100%{box-shadow:0 0 8px rgba(255,100,0,0.4);}50%{box-shadow:0 0 20px rgba(255,100,0,0.9);}}
+
+/* ══ SLOT DRAG HANDLE ══ */
+.drag-handle {
+  width:16px;height:32px;display:flex;align-items:center;justify-content:center;
+  color:#3a0000;font-size:14px;cursor:grab;flex-shrink:0;
+  border-radius:2px;transition:color 0.1s;user-select:none;letter-spacing:-1px;
+}
+.drag-handle:hover { color:#cc2222; }
+.drag-handle:active { cursor:grabbing; }
+.cslot.drag-reorder-over {
+  border-color:#ff6600!important;background:#150a00!important;
+  box-shadow:0 0 10px rgba(255,100,0,0.3);
+}
+
 /* STATUS BAR */
 #statusbar {
   background:#0a0a0a;border-top:1px solid var(--border);
@@ -429,7 +496,7 @@ body {
 
   <div id="hdr-right">
     <div id="bdm-lbl">BIG DADDY SIK MIX</div>
-    <div id="ver-lbl">MISS RUBY WORLDWIDE LLC • v1.6.2</div>
+    <div id="ver-lbl">MISS RUBY WORLDWIDE LLC • v1.6.3</div>
   </div>
 </div>
 
@@ -440,6 +507,23 @@ body {
   <div id="folder-btn" onclick="selectFolder()" class="folder-pulse">📁 SELECT MOJO AUDIO FOLDER</div>
   <div id="reload-arrow" class="step-arrow" style="display:none">👉</div>
   <div id="reload-btn" onclick="loadFromFolder()">↺ RELOAD</div>
+</div>
+
+<!-- MASTER CONTROL BAR -->
+<div id="master-bar">
+  <div id="master-lbl">MASTER</div>
+  <div id="fader-group">
+    <span id="fader-pct">100%</span>
+    <input type="range" id="master-fader" min="0" max="100" value="100">
+    <span id="vol-lbl">VOL</span>
+  </div>
+  <div id="fade-group">
+    <span id="fade-speed-lbl">FADE:</span>
+    <div class="fspd-btn sel" data-speed="2000">FAST</div>
+    <div class="fspd-btn" data-speed="5000">MED</div>
+    <div class="fspd-btn" data-speed="10000">SLOW</div>
+    <div id="fade-btn" onclick="triggerFadeOut()">⬇ FADE OUT</div>
+  </div>
 </div>
 
 <!-- MAIN -->
@@ -952,6 +1036,14 @@ function renderCarts(){
     slot.className="cslot"+(loaded?" loaded":"")+(playing?" playing":"");
     slot.id="slot-"+idx;
 
+    // DRAG HANDLE
+    const dragHandle=document.createElement("div");
+    dragHandle.className="drag-handle";
+    dragHandle.textContent="⠿";
+    dragHandle.title="Drag to reorder";
+    dragHandle.addEventListener("mousedown",()=>{ slot.draggable=true; });
+    dragHandle.addEventListener("mouseup",()=>{ slot.draggable=false; });
+
     // PLAY button
     const playBtn=document.createElement("div");
     playBtn.className="play-btn"+(playing?" active":"");
@@ -1006,6 +1098,7 @@ function renderCarts(){
     delBtn.title="Remove from slot";
     delBtn.onclick=()=>clearSlot(idx);
 
+    slot.appendChild(dragHandle);
     slot.appendChild(playBtn);
     slot.appendChild(statusLbl);
     slot.appendChild(nameDiv);
@@ -1014,11 +1107,42 @@ function renderCarts(){
     slot.appendChild(stopBtn);
     slot.appendChild(delBtn);
 
-    // Drag and drop
-    slot.addEventListener("dragover",e=>{e.preventDefault();slot.classList.add("drag-over");});
-    slot.addEventListener("dragleave",()=>slot.classList.remove("drag-over"));
+    // ── Slot reorder drag events ──
+    slot.addEventListener("dragstart",e=>{
+      if(!slot.draggable) return;
+      e.dataTransfer.setData("text/slot-reorder", String(idx));
+      e.dataTransfer.effectAllowed="move";
+      setTimeout(()=>slot.style.opacity="0.4",0);
+    });
+    slot.addEventListener("dragend",()=>{
+      slot.style.opacity="";
+      slot.draggable=false;
+      document.querySelectorAll(".cslot").forEach(s=>s.classList.remove("drag-reorder-over","drag-over"));
+    });
+
+    // ── File & reorder drop target ──
+    slot.addEventListener("dragover",e=>{
+      e.preventDefault();
+      if(e.dataTransfer.types.includes("text/slot-reorder")){
+        slot.classList.add("drag-reorder-over");
+      } else {
+        slot.classList.add("drag-over");
+      }
+    });
+    slot.addEventListener("dragleave",()=>{
+      slot.classList.remove("drag-over","drag-reorder-over");
+    });
     slot.addEventListener("drop",async e=>{
-      e.preventDefault();slot.classList.remove("drag-over");
+      e.preventDefault();
+      slot.classList.remove("drag-over","drag-reorder-over");
+      // Slot reorder
+      const fromIdx=e.dataTransfer.getData("text/slot-reorder");
+      if(fromIdx!==""){
+        const fi=parseInt(fromIdx);
+        if(!isNaN(fi)&&fi!==idx) swapSlots(fi,idx);
+        return;
+      }
+      // File drop
       const file=e.dataTransfer.files[0];
       if(file&&file.type.startsWith("audio/"))await assignFile(idx,file);
     });
@@ -1113,6 +1237,7 @@ function fireCart(idx){
   if(c.audio){ c.audio.pause(); c.audio.currentTime=0; }
 
   const a=new Audio(c.file);
+  a.volume = masterVolume;
   c.audio=a;
   c.playing=true;
   updateSlot(idx);
@@ -1174,6 +1299,93 @@ function toggleAuto(idx){
   const sw=document.getElementById("auto-"+idx);
   if(sw)sw.classList.toggle("on",carts[idx].auto);
   saveSlotAssignments();
+}
+
+
+// ══ MASTER VOLUME ══
+let masterVolume = 1.0;
+let fadeInterval = null;
+let fadeSpeed = 2000; // ms — default FAST
+
+function applyMasterVolume(){
+  carts.forEach(c=>{ if(c.audio) c.audio.volume = masterVolume; });
+  // Update fader gradient
+  const fdr = document.getElementById("master-fader");
+  if(fdr){
+    const pct = masterVolume * 100;
+    fdr.style.background =
+      `linear-gradient(to right,var(--green) 0%,var(--green) ${pct}%,#1a1a1a ${pct}%)`;
+  }
+}
+
+document.addEventListener("DOMContentLoaded",()=>{
+  // Volume slider
+  const fdr = document.getElementById("master-fader");
+  const pctLbl = document.getElementById("fader-pct");
+  if(fdr){
+    fdr.addEventListener("input",()=>{
+      if(fadeInterval){ clearInterval(fadeInterval); fadeInterval=null; document.getElementById("fade-btn").classList.remove("fading"); }
+      masterVolume = fdr.value / 100;
+      pctLbl.textContent = fdr.value + "%";
+      applyMasterVolume();
+    });
+  }
+
+  // Fade speed buttons
+  document.querySelectorAll(".fspd-btn").forEach(btn=>{
+    btn.addEventListener("click",()=>{
+      document.querySelectorAll(".fspd-btn").forEach(b=>b.classList.remove("sel"));
+      btn.classList.add("sel");
+      fadeSpeed = parseInt(btn.dataset.speed);
+    });
+  });
+});
+
+function triggerFadeOut(){
+  const fadeBtn = document.getElementById("fade-btn");
+  // If already fading, cancel
+  if(fadeInterval){
+    clearInterval(fadeInterval); fadeInterval=null;
+    fadeBtn.classList.remove("fading");
+    fadeBtn.textContent="⬇ FADE OUT";
+    return;
+  }
+  fadeBtn.classList.add("fading");
+  fadeBtn.textContent="⏸ CANCEL";
+  const startVol = masterVolume;
+  const steps = 60;
+  const stepTime = fadeSpeed / steps;
+  const stepAmt = startVol / steps;
+  let step = 0;
+  fadeInterval = setInterval(()=>{
+    step++;
+    masterVolume = Math.max(0, startVol - stepAmt * step);
+    // Sync slider + label
+    const fdr = document.getElementById("master-fader");
+    const pctLbl = document.getElementById("fader-pct");
+    if(fdr){ fdr.value = Math.round(masterVolume * 100); applyMasterVolume(); }
+    if(pctLbl) pctLbl.textContent = Math.round(masterVolume*100)+"%";
+    if(step >= steps || masterVolume <= 0){
+      clearInterval(fadeInterval); fadeInterval=null;
+      masterVolume=0;
+      applyMasterVolume();
+      fadeBtn.classList.remove("fading");
+      fadeBtn.textContent="⬇ FADE OUT";
+    }
+  }, stepTime);
+}
+
+// ══ SLOT SWAP ══
+function swapSlots(a, b){
+  // Swap all cart data except audio/playing state to avoid mid-play weirdness
+  const fields = ["name","file","fileHandle","duration","auto"];
+  fields.forEach(f=>{
+    const tmp = carts[a][f];
+    carts[a][f] = carts[b][f];
+    carts[b][f] = tmp;
+  });
+  saveSlotAssignments();
+  renderCarts();
 }
 
 // ══ INIT ══
