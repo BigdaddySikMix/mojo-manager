@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>A1 Mojo Manager v2.0.3</title>
+<title>A1 Mojo Manager v2.0.4</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Share+Tech+Mono&family=Rajdhani:wght@600;700&display=swap');
 :root {
@@ -237,7 +237,7 @@ body{background:var(--black);font-family:"Share Tech Mono",monospace;color:var(-
   <div id="startup-modal">
     <img id="startup-logo" src="https://bigdaddysikmix.github.io/mojo-manager/A1-logo.png" onerror="this.style.display='none'">
     <div id="startup-title">A1 MOJO MANAGER</div>
-    <div id="startup-sub">AREA MANAGER CONSOLE • v2.0.3</div>
+    <div id="startup-sub">AREA MANAGER CONSOLE • v2.0.4</div>
     <div id="startup-time">--:--:--</div>
     <div id="startup-date">LOADING...</div>
     <div id="startup-msg">
@@ -261,7 +261,7 @@ body{background:var(--black);font-family:"Share Tech Mono",monospace;color:var(-
   <div id="clock-wrap">
     <div id="clock">--:--:--</div>
     <div id="clock-date">...</div>
-    <div id="ver-lbl">MISS RUBY WORLDWIDE • v2.0.3</div>
+    <div id="ver-lbl">MISS RUBY WORLDWIDE • v2.0.4</div>
   </div>
 </div>
 
@@ -306,7 +306,7 @@ body{background:var(--black);font-family:"Share Tech Mono",monospace;color:var(-
 
 <!-- STATUS BAR -->
 <div id="statusbar">
-  <div id="sl">A1 MOJO MANAGER v2.0.3 • MISS RUBY WORLDWIDE LLC • BIG DADDY SIK MIX</div>
+  <div id="sl">A1 MOJO MANAGER v2.0.4 • MISS RUBY WORLDWIDE LLC • BIG DADDY SIK MIX</div>
   <div id="sr">DABBING PUG PRODUCTIONS</div>
 </div>
 
@@ -404,6 +404,16 @@ function closeSplash(){
 }
 
 // ══ FOLDER ══
+function resetFolderUI(){
+  dirHandle=null;
+  const btn=document.getElementById("folder-btn");
+  if(btn){btn.className="folder-pulse";btn.textContent="📁 SELECT AUDIO FOLDER";btn.onclick=selectFolder;}
+  const fa=document.getElementById("folder-arrow");if(fa)fa.style.display="inline";
+  const ra=document.getElementById("reload-arrow");if(ra)ra.style.display="none";
+  const nm=document.getElementById("folder-name");if(nm)nm.textContent="Folder not found — please reselect";
+  const ct=document.getElementById("folder-count");if(ct)ct.textContent="";
+}
+
 async function selectFolder(){
   try{
     dirHandle=await window.showDirectoryPicker({mode:"readwrite"});
@@ -431,9 +441,19 @@ async function restoreState(){
     if(h){
       const perm=await h.requestPermission({mode:"readwrite"});
       if(perm==="granted"){
-        dirHandle=h;
-        setFolderBtnDone();
-        await loadFromFolder();
+        // Sanity check — actually verify the folder is still there
+        try{
+          // Try to iterate at least one entry — throws if folder is gone/renamed
+          for await(const _ of h.values()){break;}
+          dirHandle=h;
+          setFolderBtnDone();
+          await loadFromFolder();
+        }catch(folderErr){
+          // Folder moved or renamed — wipe the bad handle and reset to fresh state
+          console.log("Saved folder no longer accessible, resetting:",folderErr.message);
+          await saveIDB("folder",null);
+          resetFolderUI();
+        }
       }
     }
   }catch(e){}
@@ -501,8 +521,14 @@ async function loadFromFolder(){
     renderMusicChannels();
     renderSFX();
   }catch(e){
-    const nm=document.getElementById("folder-name");
-    if(nm)nm.textContent="Error: "+e.message;
+    // If the folder disappeared during load, reset completely
+    if(e.name==="NotFoundError"||e.message.toLowerCase().includes("not found")||e.name==="NotAllowedError"){
+      await saveIDB("folder",null);
+      resetFolderUI();
+    } else {
+      const nm=document.getElementById("folder-name");if(nm)nm.textContent="Error: "+e.message;
+      const ct=document.getElementById("folder-count");if(ct)ct.textContent="";
+    }
   }
 }
 
