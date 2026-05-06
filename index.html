@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>A1 Mojo Manager v2.1.0</title>
+<title>A1 Mojo Manager v2.1.1</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Share+Tech+Mono&family=Rajdhani:wght@600;700&display=swap');
 :root {
@@ -108,10 +108,10 @@ body{background:var(--black);font-family:"Share Tech Mono",monospace;color:var(-
 .mch-name{flex:1;font-family:"Rajdhani",sans-serif;font-weight:700;font-size:13px;
   color:#ffffff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;cursor:pointer;max-width:220px;}
 .mch-name.empty{color:#2a2a2a;font-size:10px;font-style:italic;font-weight:400;}
-.mch-cd{width:38px;height:20px;background:#0f0000;border:1px solid #1e0000;border-radius:2px;
+.mch-cd{width:72px;height:28px;background:#0f0000;border:1px solid #1e0000;border-radius:2px;
   display:flex;align-items:center;justify-content:center;
-  font-family:"Share Tech Mono",monospace;font-size:9px;color:#333;flex-shrink:0;}
-.mch-cd.running{color:#ff2222;border-color:#5a0000;}
+  font-family:"Share Tech Mono",monospace;font-size:20px;color:#333;flex-shrink:0;letter-spacing:2px;}
+.mch-cd.running{color:#ff2222;border-color:#5a0000;text-shadow:0 0 8px rgba(255,34,34,0.6);}
 .mch-play{width:50px;height:26px;background:#001800;border:2px solid #1a3a1a;border-radius:3px;
   display:flex;align-items:center;justify-content:center;
   font-family:"Bebas Neue",sans-serif;font-size:11px;letter-spacing:1px;color:#2a5a2a;
@@ -190,6 +190,11 @@ body{background:var(--black);font-family:"Share Tech Mono",monospace;color:var(-
 #sfx-rack::-webkit-scrollbar{width:4px;}
 #sfx-rack::-webkit-scrollbar-track{background:#111;}
 #sfx-rack::-webkit-scrollbar-thumb{background:#444;border-radius:2px;}
+
+/* SFX countdown timer */
+.sfx-cd{font-family:"Share Tech Mono",monospace;font-size:20px;color:#333;
+  position:absolute;bottom:2px;right:5px;line-height:1;letter-spacing:1px;}
+.sfx-cd.running{color:#00ff55;text-shadow:0 0 6px rgba(0,255,85,0.5);}
 
 /* SFX BUTTON — larger font */
 .sfx-btn{background:#180000;border:1px solid #888888;border-radius:3px;
@@ -278,7 +283,7 @@ body{background:var(--black);font-family:"Share Tech Mono",monospace;color:var(-
   <div id="startup-modal">
     <img id="startup-logo" src="https://bigdaddysikmix.github.io/mojo-manager/A1-logo.png" onerror="this.style.display='none'">
     <div id="startup-title">A1 MOJO MANAGER</div>
-    <div id="startup-sub">AREA MANAGER CONSOLE • v2.1.0</div>
+    <div id="startup-sub">AREA MANAGER CONSOLE • v2.1.1</div>
     <div id="startup-time">--:--:--</div>
     <div id="startup-date">LOADING...</div>
     <div id="startup-msg">
@@ -302,7 +307,7 @@ body{background:var(--black);font-family:"Share Tech Mono",monospace;color:var(-
   <div id="clock-wrap">
     <div id="clock">--:--:--</div>
     <div id="clock-date">...</div>
-    <div id="ver-lbl">MISS RUBY WORLDWIDE • v2.1.0</div>
+    <div id="ver-lbl">MISS RUBY WORLDWIDE • v2.1.1</div>
   </div>
 </div>
 
@@ -359,7 +364,7 @@ body{background:var(--black);font-family:"Share Tech Mono",monospace;color:var(-
 
 <!-- STATUS BAR -->
 <div id="statusbar">
-  <div id="sl">A1 MOJO MANAGER v2.1.0 • MISS RUBY WORLDWIDE LLC • BIG DADDY SIK MIX</div>
+  <div id="sl">A1 MOJO MANAGER v2.1.1 • MISS RUBY WORLDWIDE LLC • BIG DADDY SIK MIX</div>
   <div id="sr">DABBING PUG PRODUCTIONS</div>
 </div>
 
@@ -581,7 +586,8 @@ function renderSFX(){
     const slotNum=document.createElement("div");slotNum.className="sfx-slot-num";slotNum.textContent=String(i+1);
     const dot=document.createElement("div");dot.className="sfx-dot"+(c.playing?" running":loaded?" ready":"");dot.id="sfxdot-"+idx;
     const nm=document.createElement("div");nm.className="sfx-name"+(loaded?"":" empty");nm.textContent=c.name||(loaded?"":"empty");nm.id="sfxnm-"+idx;
-    btn.append(slotNum,dot,nm);
+    const cd=document.createElement("div");cd.className="sfx-cd"+(c.playing?" running":"");cd.id="sfxcd-"+idx;cd.textContent="";
+    btn.append(slotNum,dot,nm,cd);
     btn.onclick=()=>{if(loaded)fireCart(idx);else pickFile(idx);};
     slotNum.style.cursor="grab";slotNum.addEventListener("mousedown",()=>btn.draggable=true);slotNum.addEventListener("mouseup",()=>btn.draggable=false);
     setupDragDrop(btn,idx);
@@ -597,7 +603,14 @@ function fireCart(idx){
   if(c.audio){c.audio.pause();c.audio.currentTime=0;}
   const a=new Audio(c.file);a.volume=(idx<MUSIC_SLOTS)?c.volume:1.0;
   c.audio=a;c.playing=true;updateCartUI(idx);
-  if(idx<MUSIC_SLOTS)startCountdown(idx);
+  // Start from queued position if set, otherwise from seek bar position
+  const startPos=c._queuePos||0;
+  if(startPos>0){
+    a.addEventListener("loadedmetadata",()=>{a.currentTime=startPos;},{ once:true });
+  }
+  c._queuePos=0;
+  if(idx<MUSIC_SLOTS)startCountdown(idx,startPos);
+  else if(c.duration>0)startSFXCountdown(idx);
   a.addEventListener("ended",()=>{
     c.playing=false;c.audio=null;updateCartUI(idx);
     if(idx<MUSIC_SLOTS){
@@ -612,11 +625,25 @@ function fireCart(idx){
 function stopCart(idx){
   const c=carts[idx];
   if(idx<MUSIC_SLOTS&&c.fadeInterval){clearInterval(c.fadeInterval);c.fadeInterval=null;updateFadeBtn(idx,false);}
+  // Save current position before stopping
+  const savedPos=(c.audio&&c.duration>0)?c.audio.currentTime:0;
   if(c.audio){c.audio.pause();c.audio.currentTime=0;c.audio=null;}
-  c.playing=false;updateCartUI(idx);
+  c.playing=false;
+  // Restore seek bar to saved position (don't reset to zero)
+  c._queuePos=savedPos;
+  updateCartUI(idx);
   if(idx<MUSIC_SLOTS){
     const cdEl=document.getElementById("mchcd-"+idx);if(cdEl)cdEl.textContent="--:--";
-    resetSeekBar(idx);
+    // Update seek bar to show queued position
+    if(c.duration>0&&savedPos>0){
+      const seek=document.getElementById("mchseek-"+idx);
+      const posEl=document.getElementById("mchseekpos-"+idx);
+      const pct=savedPos/c.duration;
+      if(seek){seek.value=Math.round(pct*1000);setSeekGrad(seek,pct);}
+      if(posEl)posEl.textContent=String(Math.floor(savedPos/60)).padStart(2,"0")+":"+String(Math.floor(savedPos%60)).padStart(2,"0");
+    } else {
+      resetSeekBar(idx);
+    }
     if(c.auto){const next=(idx+1)%MUSIC_SLOTS;if(carts[next].file)setTimeout(()=>fireCart(next),200);}
   }
 }
@@ -668,15 +695,14 @@ function updateCartUI(idx){
 
 function setFdrGrad(fdr,vol){const p=vol*100;fdr.style.background=`linear-gradient(to right,#00cc44 0%,#00cc44 ${p}%,#0a2a0a ${p}%)`;}
 
-function startCountdown(idx){
-  const c=carts[idx];c.startTime=Date.now();
+function startCountdown(idx,startPos=0){
+  const c=carts[idx];c.startTime=Date.now()-(startPos*1000);
   function tick(){
     if(!c.playing)return;
     const elapsed=(Date.now()-c.startTime)/1000;
     const rem=Math.max(0,(c.duration||0)-elapsed);
     const m=Math.floor(rem/60),s=Math.floor(rem%60);
     const cdEl=document.getElementById("mchcd-"+idx);if(cdEl)cdEl.textContent=String(m).padStart(2,"0")+":"+String(s).padStart(2,"0");
-    // Update seek bar
     if(!c._seeking&&c.duration>0){
       const seek=document.getElementById("mchseek-"+idx);
       const posEl=document.getElementById("mchseekpos-"+idx);
@@ -685,6 +711,23 @@ function startCountdown(idx){
       if(posEl)posEl.textContent=String(Math.floor(elapsed/60)).padStart(2,"0")+":"+String(Math.floor(elapsed%60)).padStart(2,"0");
     }
     if(rem>0)requestAnimationFrame(tick);
+  }
+  tick();
+}
+
+function startSFXCountdown(idx){
+  const c=carts[idx];const startTime=Date.now();
+  function tick(){
+    if(!c.playing)return;
+    const elapsed=(Date.now()-startTime)/1000;
+    const rem=Math.max(0,(c.duration||0)-elapsed);
+    const cdEl=document.getElementById("sfxcd-"+idx);
+    if(cdEl){
+      cdEl.className="sfx-cd running";
+      cdEl.textContent=String(Math.floor(rem/60)).padStart(2,"0")+":"+String(Math.floor(rem%60)).padStart(2,"0");
+    }
+    if(rem>0)requestAnimationFrame(tick);
+    else{if(cdEl){cdEl.textContent="";cdEl.className="sfx-cd";}}
   }
   tick();
 }
