@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>A1 Mojo Manager v2.0.5</title>
+<title>A1 Mojo Manager v2.1.0</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Share+Tech+Mono&family=Rajdhani:wght@600;700&display=swap');
 :root {
@@ -96,7 +96,6 @@ body{background:var(--black);font-family:"Share Tech Mono",monospace;color:var(-
 .mch-row1{display:flex;align-items:center;gap:5px;padding:4px 8px 2px 4px;}
 .mch-row2{display:flex;align-items:center;gap:6px;padding:2px 8px 4px 26px;}
 
-/* Drag handle — WHITE */
 .mch-handle{width:16px;height:34px;display:flex;align-items:center;justify-content:center;
   color:#ffffff;font-size:13px;cursor:grab;flex-shrink:0;user-select:none;
   border-radius:2px;transition:opacity 0.1s;letter-spacing:-2px;}
@@ -126,6 +125,17 @@ body{background:var(--black);font-family:"Share Tech Mono",monospace;color:var(-
 .mch-stop:hover{border-color:var(--red2);color:var(--red2);}
 .mch-stop.active{background:var(--red);border-color:var(--red2);color:#fff;box-shadow:0 0 6px rgba(255,48,48,0.35);}
 
+/* ══ SEEK BAR ══ */
+.mch-seek-wrap{flex:1;display:flex;align-items:center;gap:6px;padding:0 6px;}
+.mch-seek{flex:1;-webkit-appearance:none;appearance:none;height:6px;
+  background:#0a0a0a;border-radius:3px;outline:none;cursor:pointer;border:1px solid #333;}
+.mch-seek::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;border-radius:50%;
+  background:var(--amber);border:2px solid var(--orange2);cursor:pointer;box-shadow:0 0 4px rgba(255,170,0,0.5);}
+.mch-seek::-moz-range-thumb{width:14px;height:14px;border-radius:50%;
+  background:var(--amber);border:2px solid var(--orange2);cursor:pointer;}
+.mch-seek-pos{font-family:"Share Tech Mono",monospace;font-size:9px;color:var(--amber);
+  width:34px;text-align:right;flex-shrink:0;}
+
 /* Fader */
 .mch-fader-wrap{flex:0 0 auto;width:160px;display:flex;align-items:center;gap:5px;}
 .mch-fader{flex:1;-webkit-appearance:none;appearance:none;height:4px;
@@ -137,7 +147,7 @@ body{background:var(--black);font-family:"Share Tech Mono",monospace;color:var(-
 .mch-fdr-pct{font-family:"Share Tech Mono",monospace;font-size:9px;color:var(--green);
   width:30px;text-align:right;flex-shrink:0;}
 
-/* Speed dots — WHITE outline, orange when selected */
+/* Speed dots */
 .spd-group{display:flex;align-items:center;gap:4px;flex-shrink:0;}
 .spd-lbl-txt{font-family:"Bebas Neue",sans-serif;font-size:9px;color:var(--lbl);letter-spacing:1px;}
 .spd-dot{width:10px;height:10px;border-radius:50%;background:transparent;
@@ -181,7 +191,7 @@ body{background:var(--black);font-family:"Share Tech Mono",monospace;color:var(-
 #sfx-rack::-webkit-scrollbar-track{background:#111;}
 #sfx-rack::-webkit-scrollbar-thumb{background:#444;border-radius:2px;}
 
-/* SFX BUTTON — white outline so it's visible */
+/* SFX BUTTON — larger font */
 .sfx-btn{background:#180000;border:1px solid #888888;border-radius:3px;
   min-height:58px;display:flex;flex-direction:column;align-items:center;justify-content:center;
   gap:2px;padding:4px 3px 22px 3px;cursor:pointer;transition:border-color 0.1s,background 0.1s;position:relative;}
@@ -200,9 +210,11 @@ body{background:var(--black);font-family:"Share Tech Mono",monospace;color:var(-
 .sfx-dot{width:6px;height:6px;border-radius:50%;background:#333;flex-shrink:0;}
 .sfx-dot.ready{background:var(--red);}
 .sfx-dot.running{background:var(--green);}
+
+/* ══ LARGER SFX NAME FONT ══ */
 .sfx-name{color:var(--white);font-family:"Rajdhani",sans-serif;font-weight:700;
-  font-size:9px;text-align:center;line-height:1.2;word-break:break-word;max-height:28px;overflow:hidden;}
-.sfx-name.empty{color:#444;font-style:italic;font-size:8px;font-weight:400;font-family:monospace;}
+  font-size:12px;text-align:center;line-height:1.2;word-break:break-word;max-height:32px;overflow:hidden;}
+.sfx-name.empty{color:#444;font-style:italic;font-size:10px;font-weight:400;font-family:monospace;}
 
 /* ══ SEQUENCER ══ */
 #seq-strip{background:#0a0500;border:1px solid #333;border-radius:3px;
@@ -266,7 +278,7 @@ body{background:var(--black);font-family:"Share Tech Mono",monospace;color:var(-
   <div id="startup-modal">
     <img id="startup-logo" src="https://bigdaddysikmix.github.io/mojo-manager/A1-logo.png" onerror="this.style.display='none'">
     <div id="startup-title">A1 MOJO MANAGER</div>
-    <div id="startup-sub">AREA MANAGER CONSOLE • v2.0.5</div>
+    <div id="startup-sub">AREA MANAGER CONSOLE • v2.1.0</div>
     <div id="startup-time">--:--:--</div>
     <div id="startup-date">LOADING...</div>
     <div id="startup-msg">
@@ -290,7 +302,7 @@ body{background:var(--black);font-family:"Share Tech Mono",monospace;color:var(-
   <div id="clock-wrap">
     <div id="clock">--:--:--</div>
     <div id="clock-date">...</div>
-    <div id="ver-lbl">MISS RUBY WORLDWIDE • v2.0.5</div>
+    <div id="ver-lbl">MISS RUBY WORLDWIDE • v2.1.0</div>
   </div>
 </div>
 
@@ -331,7 +343,6 @@ body{background:var(--black);font-family:"Share Tech Mono",monospace;color:var(-
       </div>
     </div>
     <div id="sfx-rack"></div>
-    <!-- SEQUENCER -->
     <div id="seq-strip">
       <div id="seq-lbl">SEQ</div>
       <div id="seq-slots">
@@ -348,100 +359,49 @@ body{background:var(--black);font-family:"Share Tech Mono",monospace;color:var(-
 
 <!-- STATUS BAR -->
 <div id="statusbar">
-  <div id="sl">A1 MOJO MANAGER v2.0.5 • MISS RUBY WORLDWIDE LLC • BIG DADDY SIK MIX</div>
+  <div id="sl">A1 MOJO MANAGER v2.1.0 • MISS RUBY WORLDWIDE LLC • BIG DADDY SIK MIX</div>
   <div id="sr">DABBING PUG PRODUCTIONS</div>
 </div>
 
 <script>
-// ══ CONSTANTS ══
-const MUSIC_SLOTS = 4;
-const SFX_PER_PAGE = 12;
-const SFX_PAGES = 3;
-const SFX_TOTAL = SFX_PER_PAGE * SFX_PAGES;  // 36
-const TOTAL = MUSIC_SLOTS + SFX_TOTAL;         // 40
-const FADE_RESET_VOL = 0.9;
-
-// ══ UNIFIED CARTS ARRAY ══
-// Slots 0-3 = music channels, slots 4-39 = SFX grid
-let carts = Array.from({length:TOTAL}, (_,i) => ({
-  idx: i,
-  name: null, file: null, fileHandle: null,
-  audio: null, playing: false, duration: 0, startTime: 0,
-  // music channel extras (used for top 4 only)
-  volume: 1.0, fadeSpeed: 2000, fadeInterval: null, auto: false
-}));
-
-let sfxPage = 0;
-let dirHandle = null;
+const MUSIC_SLOTS=4,SFX_PER_PAGE=12,SFX_PAGES=3,SFX_TOTAL=SFX_PER_PAGE*SFX_PAGES,TOTAL=MUSIC_SLOTS+SFX_TOTAL,FADE_RESET_VOL=0.9;
+let carts=Array.from({length:TOTAL},(_,i)=>({idx:i,name:null,file:null,fileHandle:null,audio:null,playing:false,duration:0,startTime:0,volume:1.0,fadeSpeed:2000,fadeInterval:null,auto:false}));
+let sfxPage=0,dirHandle=null;
 
 // ══ IDB ══
-function openIDB(){
-  return new Promise((res,rej)=>{
-    const req=indexedDB.open("a1mojo201_db",1);
-    req.onupgradeneeded=e=>e.target.result.createObjectStore("handles");
-    req.onsuccess=e=>res(e.target.result);
-    req.onerror=e=>rej(e);
-  });
-}
-async function saveIDB(key,val){
-  try{const db=await openIDB();db.transaction("handles","readwrite").objectStore("handles").put(val,key);}catch(e){}
-}
-async function getIDB(key){
-  try{
-    const db=await openIDB();
-    return new Promise(res=>{
-      const req=db.transaction("handles","readonly").objectStore("handles").get(key);
-      req.onsuccess=e=>res(e.target.result||null);
-      req.onerror=()=>res(null);
-    });
-  }catch(e){return null;}
-}
+function openIDB(){return new Promise((res,rej)=>{const req=indexedDB.open("a1mojo201_db",1);req.onupgradeneeded=e=>e.target.result.createObjectStore("handles");req.onsuccess=e=>res(e.target.result);req.onerror=e=>rej(e);});}
+async function saveIDB(key,val){try{const db=await openIDB();db.transaction("handles","readwrite").objectStore("handles").put(val,key);}catch(e){}}
+async function getIDB(key){try{const db=await openIDB();return new Promise(res=>{const req=db.transaction("handles","readonly").objectStore("handles").get(key);req.onsuccess=e=>res(e.target.result||null);req.onerror=()=>res(null);});}catch(e){return null;}}
 
 // ══ CLOCK ══
 function updateClock(){
   const now=new Date();
-  const clockEl=document.getElementById("clock");
-  const dateEl=document.getElementById("clock-date");
+  const clockEl=document.getElementById("clock"),dateEl=document.getElementById("clock-date");
   if(clockEl)clockEl.textContent=now.toLocaleTimeString("en-US",{hour12:false});
   const d=now.toLocaleDateString("en-US",{weekday:"long",month:"long",day:"numeric",year:"numeric"}).toUpperCase();
   if(dateEl)dateEl.textContent=d;
-  // Only update splash if it's visible
   const ov=document.getElementById("startup-overlay");
   if(ov&&ov.style.display!=="none"){
-    const st=document.getElementById("startup-time");
-    const sd=document.getElementById("startup-date");
+    const st=document.getElementById("startup-time"),sd=document.getElementById("startup-date");
     if(st)st.textContent=now.toLocaleTimeString("en-US",{hour12:false});
     if(sd)sd.textContent=d;
   }
   updateMojoCountdown(now);
 }
-setInterval(updateClock,1000);
-updateClock();
+setInterval(updateClock,1000);updateClock();
 
 function updateMojoCountdown(now){
-  const val=document.getElementById("mojo-time").value;
-  if(!val)return;
-  const [h,m]=val.split(":").map(Number);
-  const target=new Date(now);target.setHours(h,m,0,0);
+  const val=document.getElementById("mojo-time").value;if(!val)return;
+  const [h,m]=val.split(":").map(Number);const target=new Date(now);target.setHours(h,m,0,0);
   if(target<=now)target.setDate(target.getDate()+1);
   const diff=Math.max(0,Math.floor((target-now)/1000));
-  const cd=document.getElementById("mojo-countdown");
-  if(!cd)return;
+  const cd=document.getElementById("mojo-countdown");if(!cd)return;
   if(diff===0){cd.textContent="GO!";cd.className="now";document.getElementById("join-btn").classList.add("pulse");}
   else if(diff<=300){cd.textContent=String(Math.floor(diff/60)).padStart(2,"0")+":"+String(diff%60).padStart(2,"0");cd.className="soon";}
   else{cd.textContent=String(Math.floor(diff/3600)).padStart(2,"0")+":"+String(Math.floor((diff%3600)/60)).padStart(2,"0");cd.className="";}
 }
-function updateAMPM(){
-  const val=document.getElementById("mojo-time").value;
-  if(!val)return;
-  const h=parseInt(val.split(":")[0]);
-  const el=document.getElementById("mojo-ampm");
-  if(el)el.textContent=h<12?"AM":"PM";
-}
-document.getElementById("mojo-time").addEventListener("change",()=>{
-  localStorage.setItem("a1mojo2_time",document.getElementById("mojo-time").value);
-  updateAMPM();
-});
+function updateAMPM(){const val=document.getElementById("mojo-time").value;if(!val)return;const h=parseInt(val.split(":")[0]);const el=document.getElementById("mojo-ampm");if(el)el.textContent=h<12?"AM":"PM";}
+document.getElementById("mojo-time").addEventListener("change",()=>{localStorage.setItem("a1mojo2_time",document.getElementById("mojo-time").value);updateAMPM();});
 
 // ══ MEETING / YT ══
 function joinMeeting(){const url=document.getElementById("meet-link").value.trim();if(url)window.open(url,"_blank");}
@@ -449,11 +409,7 @@ function openYT(){window.open("https://youtube.com","_blank");}
 document.getElementById("meet-link").addEventListener("change",()=>localStorage.setItem("a1mojo2_meetlink",document.getElementById("meet-link").value));
 
 // ══ SPLASH ══
-function closeSplash(){
-  const o=document.getElementById("startup-overlay");
-  o.style.opacity="0";o.style.transition="opacity 0.4s";
-  setTimeout(()=>o.style.display="none",400);
-}
+function closeSplash(){const o=document.getElementById("startup-overlay");o.style.opacity="0";o.style.transition="opacity 0.4s";setTimeout(()=>o.style.display="none",400);}
 
 // ══ FOLDER ══
 function resetFolderUI(){
@@ -465,15 +421,7 @@ function resetFolderUI(){
   const nm=document.getElementById("folder-name");if(nm)nm.textContent="Folder not found — please reselect";
   const ct=document.getElementById("folder-count");if(ct)ct.textContent="";
 }
-
-async function selectFolder(){
-  try{
-    dirHandle=await window.showDirectoryPicker({mode:"readwrite"});
-    await saveIDB("folder",dirHandle);
-    setFolderBtnDone();
-    await loadFromFolder();
-  }catch(e){console.log("Folder:",e.message);}
-}
+async function selectFolder(){try{dirHandle=await window.showDirectoryPicker({mode:"readwrite"});await saveIDB("folder",dirHandle);setFolderBtnDone();await loadFromFolder();}catch(e){console.log("Folder:",e.message);}}
 function setFolderBtnDone(){
   const btn=document.getElementById("folder-btn");
   if(btn){btn.className="folder-done";btn.textContent="✅ AUDIO FOLDER SET";btn.onclick=null;}
@@ -481,235 +429,128 @@ function setFolderBtnDone(){
   const ra=document.getElementById("reload-arrow");if(ra)ra.style.display="inline";
 }
 async function restoreState(){
-  // Restore settings
   const t=localStorage.getItem("a1mojo2_time");if(t)document.getElementById("mojo-time").value=t;
   const l=localStorage.getItem("a1mojo2_meetlink");if(l)document.getElementById("meet-link").value=l;
-  // Restore saved cart metadata (names, volume, auto, fadeSpeed)
   const saved=getSavedCarts();
   if(saved){saved.forEach((d,i)=>{if(d&&i<TOTAL){carts[i].name=d.name||null;carts[i].auto=d.auto||false;carts[i].volume=d.volume!=null?d.volume:1.0;carts[i].fadeSpeed=d.fadeSpeed||2000;}});}
-  // Restore folder
   try{
     const h=await getIDB("folder");
     if(h){
       const perm=await h.requestPermission({mode:"readwrite"});
       if(perm==="granted"){
-        // Sanity check — actually verify the folder is still there
-        try{
-          // Try to iterate at least one entry — throws if folder is gone/renamed
-          for await(const _ of h.values()){break;}
-          dirHandle=h;
-          setFolderBtnDone();
-          await loadFromFolder();
-        }catch(folderErr){
-          // Folder moved or renamed — wipe the bad handle and reset to fresh state
-          console.log("Saved folder no longer accessible, resetting:",folderErr.message);
-          await saveIDB("folder",null);
-          resetFolderUI();
-        }
+        try{for await(const _ of h.values()){break;}dirHandle=h;setFolderBtnDone();await loadFromFolder();}
+        catch(folderErr){console.log("Saved folder gone:",folderErr.message);await saveIDB("folder",null);resetFolderUI();}
       }
     }
   }catch(e){}
 }
 
-// ══ LOAD ALL SLOTS FROM FOLDER ══
 async function loadFromFolder(){
-  if(!dirHandle){
-    const nm=document.getElementById("folder-name");
-    if(nm)nm.textContent="No folder selected — click SELECT AUDIO FOLDER";
-    return;
-  }
-  const exts=[".mp3",".wav",".flac",".ogg",".m4a",".aac"];
-  const files=[];
+  if(!dirHandle){const nm=document.getElementById("folder-name");if(nm)nm.textContent="No folder selected";return;}
+  const exts=[".mp3",".wav",".flac",".ogg",".m4a",".aac"];const files=[];
   try{
-    for await(const entry of dirHandle.values()){
-      if(entry.kind==="file"){
-        const ext=entry.name.substring(entry.name.lastIndexOf(".")).toLowerCase();
-        if(exts.includes(ext))files.push(entry);
-      }
-    }
+    for await(const entry of dirHandle.values()){if(entry.kind==="file"){const ext=entry.name.substring(entry.name.lastIndexOf(".")).toLowerCase();if(exts.includes(ext))files.push(entry);}}
     files.sort((a,b)=>a.name.localeCompare(b.name));
     const fileMap={};files.forEach(fh=>{fileMap[fh.name.replace(/\.[^/.]+$/,"")]=fh;});
-    const saved=getSavedCarts();
-    const usedNames=new Set();
-
+    const saved=getSavedCarts();const usedNames=new Set();
     if(saved){
       for(let i=0;i<TOTAL;i++){
         const s=saved[i];
-        if(s&&s.name&&fileMap[s.name]){
-          const fh=fileMap[s.name];const file=await fh.getFile();
-          carts[i].name=s.name;carts[i].file=URL.createObjectURL(file);carts[i].fileHandle=fh;
-          usedNames.add(s.name);
-          const tmp=new Audio(carts[i].file);tmp.addEventListener("loadedmetadata",()=>carts[i].duration=tmp.duration);
-        } else {
-          carts[i].file=null;carts[i].fileHandle=null;
-          if(!s||!s.name)carts[i].name=null;
-        }
+        if(s&&s.name&&fileMap[s.name]){const fh=fileMap[s.name];const file=await fh.getFile();carts[i].name=s.name;carts[i].file=URL.createObjectURL(file);carts[i].fileHandle=fh;usedNames.add(s.name);const tmp=new Audio(carts[i].file);tmp.addEventListener("loadedmetadata",()=>carts[i].duration=tmp.duration);}
+        else{carts[i].file=null;carts[i].fileHandle=null;if(!s||!s.name)carts[i].name=null;}
       }
       const newNames=Object.keys(fileMap).filter(n=>!usedNames.has(n)).sort();let ni=0;
-      for(let i=0;i<TOTAL&&ni<newNames.length;i++){
-        if(!carts[i].file){
-          const n=newNames[ni++];const fh=fileMap[n];const file=await fh.getFile();
-          carts[i].name=n;carts[i].file=URL.createObjectURL(file);carts[i].fileHandle=fh;
-          const tmp=new Audio(carts[i].file);tmp.addEventListener("loadedmetadata",()=>carts[i].duration=tmp.duration);
-        }
-      }
+      for(let i=0;i<TOTAL&&ni<newNames.length;i++){if(!carts[i].file){const n=newNames[ni++];const fh=fileMap[n];const file=await fh.getFile();carts[i].name=n;carts[i].file=URL.createObjectURL(file);carts[i].fileHandle=fh;const tmp=new Audio(carts[i].file);tmp.addEventListener("loadedmetadata",()=>carts[i].duration=tmp.duration);}}
     } else {
-      for(let i=0;i<TOTAL;i++){
-        if(i<files.length){
-          const fh=files[i];const file=await fh.getFile();
-          carts[i].name=fh.name.replace(/\.[^/.]+$/,"");carts[i].file=URL.createObjectURL(file);carts[i].fileHandle=fh;
-          const tmp=new Audio(carts[i].file);tmp.addEventListener("loadedmetadata",()=>carts[i].duration=tmp.duration);
-        } else {carts[i].name=null;carts[i].file=null;carts[i].fileHandle=null;}
-      }
+      for(let i=0;i<TOTAL;i++){if(i<files.length){const fh=files[i];const file=await fh.getFile();carts[i].name=fh.name.replace(/\.[^/.]+$/,"");carts[i].file=URL.createObjectURL(file);carts[i].fileHandle=fh;const tmp=new Audio(carts[i].file);tmp.addEventListener("loadedmetadata",()=>carts[i].duration=tmp.duration);}else{carts[i].name=null;carts[i].file=null;carts[i].fileHandle=null;}}
     }
-
-    // Update status — no innerHTML wipe, just update the spans
-    const nm=document.getElementById("folder-name");
-    const ct=document.getElementById("folder-count");
-    if(nm)nm.textContent=dirHandle.name;
-    if(ct)ct.textContent=" — "+Math.min(files.length,TOTAL)+" files loaded ✅";
-
-    saveCarts();
-    renderMusicChannels();
-    renderSFX();
+    const nm=document.getElementById("folder-name"),ct=document.getElementById("folder-count");
+    if(nm)nm.textContent=dirHandle.name;if(ct)ct.textContent=" — "+Math.min(files.length,TOTAL)+" files loaded ✅";
+    saveCarts();renderMusicChannels();renderSFX();
   }catch(e){
-    // If the folder disappeared during load, reset completely
-    if(e.name==="NotFoundError"||e.message.toLowerCase().includes("not found")||e.name==="NotAllowedError"){
-      await saveIDB("folder",null);
-      resetFolderUI();
-    } else {
-      const nm=document.getElementById("folder-name");if(nm)nm.textContent="Error: "+e.message;
-      const ct=document.getElementById("folder-count");if(ct)ct.textContent="";
-    }
+    if(e.name==="NotFoundError"||e.message.toLowerCase().includes("not found")||e.name==="NotAllowedError"){await saveIDB("folder",null);resetFolderUI();}
+    else{const nm=document.getElementById("folder-name");if(nm)nm.textContent="Error: "+e.message;const ct=document.getElementById("folder-count");if(ct)ct.textContent="";}
   }
 }
 
-// ══ SAVE / RESTORE ══
-function saveCarts(){
-  try{localStorage.setItem("a1mojo2_carts",JSON.stringify(carts.map(c=>c.name?{name:c.name,auto:c.auto,volume:c.volume,fadeSpeed:c.fadeSpeed}:null)));}catch(e){}
-}
-function getSavedCarts(){
-  try{const s=localStorage.getItem("a1mojo2_carts");return s?JSON.parse(s):null;}catch(e){return null;}
-}
+function saveCarts(){try{localStorage.setItem("a1mojo2_carts",JSON.stringify(carts.map(c=>c.name?{name:c.name,auto:c.auto,volume:c.volume,fadeSpeed:c.fadeSpeed}:null)));}catch(e){}}
+function getSavedCarts(){try{const s=localStorage.getItem("a1mojo2_carts");return s?JSON.parse(s):null;}catch(e){return null;}}
 
-// ══ UNIFIED DRAG ══
-// data type "text/cart-idx" = global slot index as string
-function setupDragDrop(el, globalIdx){
-  // Slot as drag source (for reordering)
-  el.addEventListener("dragstart",e=>{
-    if(!el.draggable)return;
-    e.dataTransfer.setData("text/cart-idx",String(globalIdx));
-    e.dataTransfer.effectAllowed="move";
-    setTimeout(()=>el.style.opacity="0.4",0);
-  });
-  el.addEventListener("dragend",()=>{
-    el.style.opacity="";el.draggable=false;
-    document.querySelectorAll(".mch,.sfx-btn").forEach(x=>x.classList.remove("drag-over"));
-  });
-  // Slot as drop target
-  el.addEventListener("dragover",e=>{
-    e.preventDefault();el.classList.add("drag-over");
-  });
+// ══ DRAG/DROP ══
+function setupDragDrop(el,globalIdx){
+  el.addEventListener("dragstart",e=>{if(!el.draggable)return;e.dataTransfer.setData("text/cart-idx",String(globalIdx));e.dataTransfer.effectAllowed="move";setTimeout(()=>el.style.opacity="0.4",0);});
+  el.addEventListener("dragend",()=>{el.style.opacity="";el.draggable=false;document.querySelectorAll(".mch,.sfx-btn").forEach(x=>x.classList.remove("drag-over"));});
+  el.addEventListener("dragover",e=>{e.preventDefault();el.classList.add("drag-over");});
   el.addEventListener("dragleave",()=>el.classList.remove("drag-over"));
   el.addEventListener("drop",async e=>{
     e.preventDefault();el.classList.remove("drag-over");
-    // Slot-to-slot reorder
     const fromStr=e.dataTransfer.getData("text/cart-idx");
-    if(fromStr!==""){
-      const fi=parseInt(fromStr);
-      if(!isNaN(fi)&&fi!==globalIdx){swapCarts(fi,globalIdx);}
-      return;
-    }
-    // File drop from OS
-    const file=e.dataTransfer.files[0];
-    if(file&&file.type.startsWith("audio/"))await assignFile(globalIdx,file);
+    if(fromStr!==""){const fi=parseInt(fromStr);if(!isNaN(fi)&&fi!==globalIdx)swapCarts(fi,globalIdx);return;}
+    const file=e.dataTransfer.files[0];if(file&&file.type.startsWith("audio/"))await assignFile(globalIdx,file);
   });
 }
-
-function swapCarts(a,b){
-  const fields=["name","file","fileHandle","duration","auto","volume","fadeSpeed"];
-  fields.forEach(f=>{const tmp=carts[a][f];carts[a][f]=carts[b][f];carts[b][f]=tmp;});
-  saveCarts();
-  renderMusicChannels();
-  renderSFX();
-}
-
-async function assignFile(idx,file){
-  // Copy to folder if we have one
-  if(dirHandle){
-    try{const fh=await dirHandle.getFileHandle(file.name,{create:true});const w=await fh.createWritable();await w.write(await file.arrayBuffer());await w.close();}catch(e){}
-  }
-  carts[idx].name=file.name.replace(/\.[^/.]+$/,"");
-  carts[idx].file=URL.createObjectURL(file);
-  carts[idx].fileHandle=null;
-  const tmp=new Audio(carts[idx].file);tmp.addEventListener("loadedmetadata",()=>carts[idx].duration=tmp.duration);
-  saveCarts();
-  if(idx<MUSIC_SLOTS)renderMusicChannels();
-  else renderSFX();
-}
-
-async function pickFile(idx){
-  try{
-    const [fh]=await window.showOpenFilePicker({types:[{description:"Audio",accept:{"audio/*":[".mp3",".wav",".flac",".ogg",".m4a",".aac"]}}]});
-    const file=await fh.getFile();
-    carts[idx].name=file.name.replace(/\.[^/.]+$/,"");
-    carts[idx].file=URL.createObjectURL(file);carts[idx].fileHandle=fh;
-    const tmp=new Audio(carts[idx].file);tmp.addEventListener("loadedmetadata",()=>carts[idx].duration=tmp.duration);
-    saveCarts();
-    if(idx<MUSIC_SLOTS)renderMusicChannels();else renderSFX();
-  }catch(e){}
-}
+function swapCarts(a,b){const fields=["name","file","fileHandle","duration","auto","volume","fadeSpeed"];fields.forEach(f=>{const tmp=carts[a][f];carts[a][f]=carts[b][f];carts[b][f]=tmp;});saveCarts();renderMusicChannels();renderSFX();}
+async function assignFile(idx,file){if(dirHandle){try{const fh=await dirHandle.getFileHandle(file.name,{create:true});const w=await fh.createWritable();await w.write(await file.arrayBuffer());await w.close();}catch(e){}}carts[idx].name=file.name.replace(/\.[^/.]+$/,"");carts[idx].file=URL.createObjectURL(file);carts[idx].fileHandle=null;const tmp=new Audio(carts[idx].file);tmp.addEventListener("loadedmetadata",()=>carts[idx].duration=tmp.duration);saveCarts();if(idx<MUSIC_SLOTS)renderMusicChannels();else renderSFX();}
+async function pickFile(idx){try{const [fh]=await window.showOpenFilePicker({types:[{description:"Audio",accept:{"audio/*":[".mp3",".wav",".flac",".ogg",".m4a",".aac"]}}]});const file=await fh.getFile();carts[idx].name=file.name.replace(/\.[^/.]+$/,"");carts[idx].file=URL.createObjectURL(file);carts[idx].fileHandle=fh;const tmp=new Audio(carts[idx].file);tmp.addEventListener("loadedmetadata",()=>carts[idx].duration=tmp.duration);saveCarts();if(idx<MUSIC_SLOTS)renderMusicChannels();else renderSFX();}catch(e){}}
 
 // ══ MUSIC CHANNEL RENDER ══
 function renderMusicChannels(){
   const container=document.getElementById("music-channels");container.innerHTML="";
   for(let i=0;i<MUSIC_SLOTS;i++){
     const ch=carts[i];
-    const wrap=document.createElement("div");
-    wrap.className="mch"+(ch.file?" loaded":"")+(ch.playing?" playing":"");wrap.id="mch-"+i;
+    const wrap=document.createElement("div");wrap.className="mch"+(ch.file?" loaded":"")+(ch.playing?" playing":"");wrap.id="mch-"+i;
 
-    // ROW 1
+    // ROW 1: handle | num | name | cd | play | stop | [SEEK BAR]
     const row1=document.createElement("div");row1.className="mch-row1";
     const handle=document.createElement("div");handle.className="mch-handle";handle.textContent="⠿";handle.title="Drag to reorder";
-    handle.addEventListener("mousedown",()=>wrap.draggable=true);
-    handle.addEventListener("mouseup",()=>wrap.draggable=false);
+    handle.addEventListener("mousedown",()=>wrap.draggable=true);handle.addEventListener("mouseup",()=>wrap.draggable=false);
     const num=document.createElement("div");num.className="mch-num"+(ch.file?"":" dim");num.textContent=i+1;
-    const name=document.createElement("div");name.className="mch-name"+(ch.file?"":" empty");
-    name.id="mchnm-"+i;name.textContent=ch.name||(ch.file?"":"click PLAY to load a song");
-    name.onclick=()=>{if(!ch.file)pickFile(i);};
+    const name=document.createElement("div");name.className="mch-name"+(ch.file?"":" empty");name.id="mchnm-"+i;name.textContent=ch.name||(ch.file?"":"click PLAY to load a song");name.onclick=()=>{if(!ch.file)pickFile(i);};
     const cd=document.createElement("div");cd.className="mch-cd"+(ch.playing?" running":"");cd.id="mchcd-"+i;cd.textContent="--:--";
     const play=document.createElement("div");play.className="mch-play"+(ch.playing?" active":"");play.textContent="▶ PLAY";play.onclick=()=>fireCart(i);
     const stop=document.createElement("div");stop.className="mch-stop"+(ch.playing?" active":"");stop.textContent="■ STOP";stop.onclick=()=>stopCart(i);
-    row1.append(handle,num,name,cd,play,stop);
 
-    // ROW 2
+    // SEEK BAR
+    const seekWrap=document.createElement("div");seekWrap.className="mch-seek-wrap";
+    const seek=document.createElement("input");seek.type="range";seek.min=0;seek.max=1000;seek.value=0;seek.className="mch-seek";seek.id="mchseek-"+i;seek.title="Scrub / seek position";
+    setSeekGrad(seek,0);
+    seek.addEventListener("mousedown",()=>{ch._seeking=true;});
+    seek.addEventListener("mouseup",()=>{
+      ch._seeking=false;
+      if(ch.audio&&ch.duration){
+        const pos=(seek.value/1000)*ch.duration;
+        ch.audio.currentTime=pos;
+        ch.startTime=Date.now()-(pos*1000);
+      }
+    });
+    seek.addEventListener("input",()=>{
+      const pct=seek.value/1000;
+      setSeekGrad(seek,pct);
+      const posEl=document.getElementById("mchseekpos-"+i);
+      if(posEl&&ch.duration){
+        const pos=pct*ch.duration;
+        posEl.textContent=String(Math.floor(pos/60)).padStart(2,"0")+":"+String(Math.floor(pos%60)).padStart(2,"0");
+      }
+    });
+    const seekPos=document.createElement("div");seekPos.className="mch-seek-pos";seekPos.id="mchseekpos-"+i;seekPos.textContent="--:--";
+    seekWrap.append(seek,seekPos);
+
+    row1.append(handle,num,name,cd,play,stop,seekWrap);
+
+    // ROW 2: fader | speed dots | fade btn | PN
     const row2=document.createElement("div");row2.className="mch-row2";
     const fdrWrap=document.createElement("div");fdrWrap.className="mch-fader-wrap";
-    const fdr=document.createElement("input");fdr.type="range";fdr.min=0;fdr.max=100;
-    fdr.value=Math.round(ch.volume*100);fdr.className="mch-fader";fdr.id="mchfdr-"+i;
+    const fdr=document.createElement("input");fdr.type="range";fdr.min=0;fdr.max=100;fdr.value=Math.round(ch.volume*100);fdr.className="mch-fader";fdr.id="mchfdr-"+i;
     setFdrGrad(fdr,ch.volume);
-    fdr.addEventListener("input",()=>{
-      if(ch.fadeInterval){clearInterval(ch.fadeInterval);ch.fadeInterval=null;updateFadeBtn(i,false);}
-      ch.volume=fdr.value/100;if(ch.audio)ch.audio.volume=ch.volume;
-      const p=document.getElementById("mchpct-"+i);if(p)p.textContent=fdr.value+"%";
-      setFdrGrad(fdr,ch.volume);
-    });
-    const pct=document.createElement("div");pct.className="mch-fdr-pct";pct.id="mchpct-"+i;
-    pct.textContent=Math.round(ch.volume*100)+"%";
+    fdr.addEventListener("input",()=>{if(ch.fadeInterval){clearInterval(ch.fadeInterval);ch.fadeInterval=null;updateFadeBtn(i,false);}ch.volume=fdr.value/100;if(ch.audio)ch.audio.volume=ch.volume;const p=document.getElementById("mchpct-"+i);if(p)p.textContent=fdr.value+"%";setFdrGrad(fdr,ch.volume);});
+    const pct=document.createElement("div");pct.className="mch-fdr-pct";pct.id="mchpct-"+i;pct.textContent=Math.round(ch.volume*100)+"%";
     fdrWrap.append(fdr,pct);
 
     const spdGroup=document.createElement("div");spdGroup.className="spd-group";
-    const spdLbl=document.createElement("div");spdLbl.className="spd-lbl-txt";spdLbl.textContent="SPD";
-    spdGroup.appendChild(spdLbl);
-    [{ms:2000,t:"Fast"},{ms:5000,t:"Med"},{ms:10000,t:"Slow"}].forEach(({ms,t})=>{
-      const dot=document.createElement("div");dot.className="spd-dot"+(ch.fadeSpeed===ms?" sel":"");dot.title=t;
-      dot.addEventListener("click",()=>{ch.fadeSpeed=ms;wrap.querySelectorAll(".spd-dot").forEach(d=>d.classList.remove("sel"));dot.classList.add("sel");});
-      spdGroup.appendChild(dot);
-    });
+    const spdLbl=document.createElement("div");spdLbl.className="spd-lbl-txt";spdLbl.textContent="SPD";spdGroup.appendChild(spdLbl);
+    [{ms:2000,t:"Fast"},{ms:5000,t:"Med"},{ms:10000,t:"Slow"}].forEach(({ms,t})=>{const dot=document.createElement("div");dot.className="spd-dot"+(ch.fadeSpeed===ms?" sel":"");dot.title=t;dot.addEventListener("click",()=>{ch.fadeSpeed=ms;wrap.querySelectorAll(".spd-dot").forEach(d=>d.classList.remove("sel"));dot.classList.add("sel");});spdGroup.appendChild(dot);});
 
-    const fadeBtn=document.createElement("div");fadeBtn.className="mch-fade";fadeBtn.id="mchfade-"+i;
-    fadeBtn.textContent="↓";fadeBtn.title="Auto fade — resets volume to 90% after";
-    fadeBtn.onclick=()=>triggerFade(i);
+    const fadeBtn=document.createElement("div");fadeBtn.className="mch-fade";fadeBtn.id="mchfade-"+i;fadeBtn.textContent="↓";fadeBtn.title="Auto fade";fadeBtn.onclick=()=>triggerFade(i);
 
     const pnGroup=document.createElement("div");pnGroup.className="pn-group";
     const pnLbl=document.createElement("div");pnLbl.className="pn-lbl";pnLbl.textContent="PN";
@@ -719,43 +560,30 @@ function renderMusicChannels(){
     pnGroup.append(pnLbl,pnSw);
     row2.append(fdrWrap,spdGroup,fadeBtn,pnGroup);
     wrap.append(row1,row2);
-
     setupDragDrop(wrap,i);
     container.appendChild(wrap);
   }
 }
 
-// ══ SFX RENDER ══
-function switchSFXPage(p){
-  sfxPage=p;
-  document.querySelectorAll(".stab").forEach((t,i)=>t.classList.toggle("active",i===p));
-  renderSFX();
+function setSeekGrad(seek,pct){
+  const p=pct*100;
+  seek.style.background=`linear-gradient(to right,#ffaa00 0%,#ffaa00 ${p}%,#0a0a0a ${p}%)`;
 }
+
+// ══ SFX RENDER ══
+function switchSFXPage(p){sfxPage=p;document.querySelectorAll(".stab").forEach((t,i)=>t.classList.toggle("active",i===p));renderSFX();}
 function renderSFX(){
   const rack=document.getElementById("sfx-rack");rack.innerHTML="";
   const base=MUSIC_SLOTS+(sfxPage*SFX_PER_PAGE);
   for(let i=0;i<SFX_PER_PAGE;i++){
     const idx=base+i;const c=carts[idx];const loaded=!!c.file;
-    const btn=document.createElement("div");
-    btn.className="sfx-btn"+(loaded?" loaded":"  empty-slot")+(c.playing?" playing":"");
-    btn.id="sfx-"+idx;
-
-    // Slot number (1-12)
-    const slotNum=document.createElement("div");slotNum.className="sfx-slot-num";
-    slotNum.textContent=String(i+1);
-
+    const btn=document.createElement("div");btn.className="sfx-btn"+(loaded?" loaded":"  empty-slot")+(c.playing?" playing":"");btn.id="sfx-"+idx;
+    const slotNum=document.createElement("div");slotNum.className="sfx-slot-num";slotNum.textContent=String(i+1);
     const dot=document.createElement("div");dot.className="sfx-dot"+(c.playing?" running":loaded?" ready":"");dot.id="sfxdot-"+idx;
-    const nm=document.createElement("div");nm.className="sfx-name"+(loaded?"":" empty");
-    nm.textContent=c.name||(loaded?"":"empty");nm.id="sfxnm-"+idx;
-
+    const nm=document.createElement("div");nm.className="sfx-name"+(loaded?"":" empty");nm.textContent=c.name||(loaded?"":"empty");nm.id="sfxnm-"+idx;
     btn.append(slotNum,dot,nm);
     btn.onclick=()=>{if(loaded)fireCart(idx);else pickFile(idx);};
-
-    // Add drag handle behavior — mousedown on slot number to drag
-    slotNum.style.cursor="grab";
-    slotNum.addEventListener("mousedown",()=>btn.draggable=true);
-    slotNum.addEventListener("mouseup",()=>btn.draggable=false);
-
+    slotNum.style.cursor="grab";slotNum.addEventListener("mousedown",()=>btn.draggable=true);slotNum.addEventListener("mouseup",()=>btn.draggable=false);
     setupDragDrop(btn,idx);
     rack.appendChild(btn);
   }
@@ -767,15 +595,14 @@ function fireCart(idx){
   if(!c.file){pickFile(idx);return;}
   if(c.playing){stopCart(idx);return;}
   if(c.audio){c.audio.pause();c.audio.currentTime=0;}
-  const a=new Audio(c.file);
-  a.volume=(idx<MUSIC_SLOTS)?c.volume:1.0;
-  c.audio=a;c.playing=true;
-  updateCartUI(idx);
+  const a=new Audio(c.file);a.volume=(idx<MUSIC_SLOTS)?c.volume:1.0;
+  c.audio=a;c.playing=true;updateCartUI(idx);
   if(idx<MUSIC_SLOTS)startCountdown(idx);
   a.addEventListener("ended",()=>{
     c.playing=false;c.audio=null;updateCartUI(idx);
     if(idx<MUSIC_SLOTS){
       const cdEl=document.getElementById("mchcd-"+idx);if(cdEl)cdEl.textContent="--:--";
+      resetSeekBar(idx);
       if(c.auto){const next=(idx+1)%MUSIC_SLOTS;if(carts[next].file)setTimeout(()=>fireCart(next),200);}
     }
   });
@@ -789,8 +616,15 @@ function stopCart(idx){
   c.playing=false;updateCartUI(idx);
   if(idx<MUSIC_SLOTS){
     const cdEl=document.getElementById("mchcd-"+idx);if(cdEl)cdEl.textContent="--:--";
+    resetSeekBar(idx);
     if(c.auto){const next=(idx+1)%MUSIC_SLOTS;if(carts[next].file)setTimeout(()=>fireCart(next),200);}
   }
+}
+
+function resetSeekBar(idx){
+  const seek=document.getElementById("mchseek-"+idx);const pos=document.getElementById("mchseekpos-"+idx);
+  if(seek){seek.value=0;setSeekGrad(seek,0);}
+  if(pos)pos.textContent="--:--";
 }
 
 function triggerFade(idx){
@@ -799,33 +633,23 @@ function triggerFade(idx){
   updateFadeBtn(idx,true);
   const startVol=ch.volume,steps=60,stepTime=ch.fadeSpeed/steps,stepAmt=startVol/steps;let step=0;
   ch.fadeInterval=setInterval(()=>{
-    step++;ch.volume=Math.max(0,startVol-stepAmt*step);
-    if(ch.audio)ch.audio.volume=ch.volume;
+    step++;ch.volume=Math.max(0,startVol-stepAmt*step);if(ch.audio)ch.audio.volume=ch.volume;
     const fdr=document.getElementById("mchfdr-"+idx);const pctEl=document.getElementById("mchpct-"+idx);
-    if(fdr){fdr.value=Math.round(ch.volume*100);setFdrGrad(fdr,ch.volume);}
-    if(pctEl)pctEl.textContent=Math.round(ch.volume*100)+"%";
+    if(fdr){fdr.value=Math.round(ch.volume*100);setFdrGrad(fdr,ch.volume);}if(pctEl)pctEl.textContent=Math.round(ch.volume*100)+"%";
     if(step>=steps||ch.volume<=0){
       clearInterval(ch.fadeInterval);ch.fadeInterval=null;
       if(ch.audio){ch.audio.pause();ch.audio.currentTime=0;ch.audio=null;}
-      ch.playing=false;
-      // Reset to 90%
-      ch.volume=FADE_RESET_VOL;
+      ch.playing=false;ch.volume=FADE_RESET_VOL;
       const fdr2=document.getElementById("mchfdr-"+idx);const pct2=document.getElementById("mchpct-"+idx);
-      if(fdr2){fdr2.value=Math.round(FADE_RESET_VOL*100);setFdrGrad(fdr2,FADE_RESET_VOL);}
-      if(pct2)pct2.textContent=Math.round(FADE_RESET_VOL*100)+"%";
-      updateFadeBtn(idx,false);updateCartUI(idx);
+      if(fdr2){fdr2.value=Math.round(FADE_RESET_VOL*100);setFdrGrad(fdr2,FADE_RESET_VOL);}if(pct2)pct2.textContent=Math.round(FADE_RESET_VOL*100)+"%";
+      updateFadeBtn(idx,false);updateCartUI(idx);resetSeekBar(idx);
       const cdEl=document.getElementById("mchcd-"+idx);if(cdEl)cdEl.textContent="--:--";
-      // Fire next if PN is on
       if(ch.auto){const next=(idx+1)%MUSIC_SLOTS;if(carts[next].file)setTimeout(()=>fireCart(next),300);}
     }
   },stepTime);
 }
 
-function updateFadeBtn(idx,fading){
-  const btn=document.getElementById("mchfade-"+idx);if(!btn)return;
-  if(fading){btn.classList.add("fading");btn.textContent="✕";}
-  else{btn.classList.remove("fading");btn.textContent="↓";}
-}
+function updateFadeBtn(idx,fading){const btn=document.getElementById("mchfade-"+idx);if(!btn)return;if(fading){btn.classList.add("fading");btn.textContent="✕";}else{btn.classList.remove("fading");btn.textContent="↓";}}
 
 function updateCartUI(idx){
   if(idx<MUSIC_SLOTS){
@@ -842,149 +666,76 @@ function updateCartUI(idx){
   }
 }
 
-function setFdrGrad(fdr,vol){
-  const p=vol*100;
-  fdr.style.background=`linear-gradient(to right,#00cc44 0%,#00cc44 ${p}%,#0a2a0a ${p}%)`;
-}
+function setFdrGrad(fdr,vol){const p=vol*100;fdr.style.background=`linear-gradient(to right,#00cc44 0%,#00cc44 ${p}%,#0a2a0a ${p}%)`;}
 
 function startCountdown(idx){
   const c=carts[idx];c.startTime=Date.now();
   function tick(){
     if(!c.playing)return;
-    const rem=Math.max(0,(c.duration||0)-(Date.now()-c.startTime)/1000);
+    const elapsed=(Date.now()-c.startTime)/1000;
+    const rem=Math.max(0,(c.duration||0)-elapsed);
     const m=Math.floor(rem/60),s=Math.floor(rem%60);
-    const cdEl=document.getElementById("mchcd-"+idx);
-    if(cdEl)cdEl.textContent=String(m).padStart(2,"0")+":"+String(s).padStart(2,"0");
+    const cdEl=document.getElementById("mchcd-"+idx);if(cdEl)cdEl.textContent=String(m).padStart(2,"0")+":"+String(s).padStart(2,"0");
+    // Update seek bar
+    if(!c._seeking&&c.duration>0){
+      const seek=document.getElementById("mchseek-"+idx);
+      const posEl=document.getElementById("mchseekpos-"+idx);
+      const pct=Math.min(1,elapsed/c.duration);
+      if(seek){seek.value=Math.round(pct*1000);setSeekGrad(seek,pct);}
+      if(posEl)posEl.textContent=String(Math.floor(elapsed/60)).padStart(2,"0")+":"+String(Math.floor(elapsed%60)).padStart(2,"0");
+    }
     if(rem>0)requestAnimationFrame(tick);
   }
   tick();
 }
 
-// ══ CROSS-PAGE DRAG — drop slot onto page tab ══
+// ══ PAGE TAB DROP ══
 function setupPageTabDrop(){
   document.querySelectorAll(".stab").forEach((tab,pageIdx)=>{
-    tab.addEventListener("dragover",e=>{
-      if(e.dataTransfer.types.includes("text/cart-idx")){
-        e.preventDefault();tab.style.borderColor="var(--orange)";tab.style.color="var(--orange)";
-      }
-    });
-    tab.addEventListener("dragleave",()=>{
-      tab.style.borderColor="";tab.style.color="";
-    });
+    tab.addEventListener("dragover",e=>{if(e.dataTransfer.types.includes("text/cart-idx")){e.preventDefault();tab.style.borderColor="var(--orange)";tab.style.color="var(--orange)";}});
+    tab.addEventListener("dragleave",()=>{tab.style.borderColor="";tab.style.color="";});
     tab.addEventListener("drop",e=>{
       e.preventDefault();tab.style.borderColor="";tab.style.color="";
       const fromStr=e.dataTransfer.getData("text/cart-idx");if(fromStr==="")return;
-      const fi=parseInt(fromStr);if(isNaN(fi)||fi<MUSIC_SLOTS)return; // music channels stay put
-      // Find first empty slot on target page
-      const base=MUSIC_SLOTS+(pageIdx*SFX_PER_PAGE);
-      let target=-1;
+      const fi=parseInt(fromStr);if(isNaN(fi)||fi<MUSIC_SLOTS)return;
+      const base=MUSIC_SLOTS+(pageIdx*SFX_PER_PAGE);let target=-1;
       for(let i=base;i<base+SFX_PER_PAGE;i++){if(!carts[i].file){target=i;break;}}
-      if(target===-1)target=base; // no empty slot, use first slot of page
-      if(target===fi)return;
-      swapCarts(fi,target);
-      switchSFXPage(pageIdx);
+      if(target===-1)target=base;if(target===fi)return;
+      swapCarts(fi,target);switchSFXPage(pageIdx);
     });
   });
 }
 
 // ══ SEQUENCER ══
-let seqSlots=[null,null,null,null];
-let seqActive=false;
-let seqQueue=[];
-
+let seqSlots=[null,null,null,null],seqActive=false,seqQueue=[];
 function renderSeq(){
   for(let i=0;i<4;i++){
     const slot=document.getElementById("seq-"+i);if(!slot)continue;
-    const cidx=seqSlots[i];
-    const nm=slot.querySelector(".seq-name");
+    const cidx=seqSlots[i];const nm=slot.querySelector(".seq-name");
     if(cidx!==null&&carts[cidx]&&carts[cidx].file){
-      slot.className="seq-slot filled";
-      if(nm)nm.textContent=carts[cidx].name||"track";
-      // Add X button if not there
-      if(!slot.querySelector(".seq-x")){
-        const x=document.createElement("span");x.className="seq-x";x.textContent="✕";
-        x.onclick=(e)=>{e.stopPropagation();seqSlots[i]=null;renderSeq();};
-        slot.appendChild(x);
-      }
-    } else {
-      seqSlots[i]=null;
-      slot.className="seq-slot";
-      if(nm)nm.textContent="empty";
-      const x=slot.querySelector(".seq-x");if(x)x.remove();
-    }
-    // Drop target
+      slot.className="seq-slot filled";if(nm)nm.textContent=carts[cidx].name||"track";
+      if(!slot.querySelector(".seq-x")){const x=document.createElement("span");x.className="seq-x";x.textContent="✕";x.onclick=(e)=>{e.stopPropagation();seqSlots[i]=null;renderSeq();};slot.appendChild(x);}
+    } else {seqSlots[i]=null;slot.className="seq-slot";if(nm)nm.textContent="empty";const x=slot.querySelector(".seq-x");if(x)x.remove();}
     slot.ondragover=e=>{if(e.dataTransfer.types.includes("text/cart-idx")){e.preventDefault();slot.classList.add("drag-over");}};
     slot.ondragleave=()=>slot.classList.remove("drag-over");
-    slot.ondrop=e=>{
-      e.preventDefault();slot.classList.remove("drag-over");
-      const fromStr=e.dataTransfer.getData("text/cart-idx");if(fromStr==="")return;
-      const fi=parseInt(fromStr);if(isNaN(fi)||fi<MUSIC_SLOTS)return;
-      seqSlots[i]=fi;renderSeq();
-    };
+    slot.ondrop=e=>{e.preventDefault();slot.classList.remove("drag-over");const fromStr=e.dataTransfer.getData("text/cart-idx");if(fromStr==="")return;const fi=parseInt(fromStr);if(isNaN(fi)||fi<MUSIC_SLOTS)return;seqSlots[i]=fi;renderSeq();};
   }
 }
-
-function fireSequence(){
-  if(seqActive){stopSequence();return;}
-  seqQueue=seqSlots.filter(idx=>idx!==null&&idx<TOTAL&&carts[idx]&&carts[idx].file);
-  if(seqQueue.length===0)return;
-  seqActive=true;
-  document.getElementById("seq-fire").classList.add("firing");
-  document.getElementById("seq-fire").textContent="■ STOP SEQ";
-  playSeqStep(0);
-}
-
+function fireSequence(){if(seqActive){stopSequence();return;}seqQueue=seqSlots.filter(idx=>idx!==null&&idx<TOTAL&&carts[idx]&&carts[idx].file);if(seqQueue.length===0)return;seqActive=true;document.getElementById("seq-fire").classList.add("firing");document.getElementById("seq-fire").textContent="■ STOP SEQ";playSeqStep(0);}
 function playSeqStep(step){
-  if(step>=seqQueue.length||!seqActive){
-    seqActive=false;
-    document.getElementById("seq-fire").classList.remove("firing");
-    document.getElementById("seq-fire").textContent="▶ FIRE SEQ";
-    // Clear active highlights
-    document.querySelectorAll(".seq-slot").forEach(s=>s.classList.remove("active"));
-    return;
-  }
+  if(step>=seqQueue.length||!seqActive){seqActive=false;document.getElementById("seq-fire").classList.remove("firing");document.getElementById("seq-fire").textContent="▶ FIRE SEQ";document.querySelectorAll(".seq-slot").forEach(s=>s.classList.remove("active"));return;}
   const idx=seqQueue[step];const c=carts[idx];
-  // Highlight active seq slot
-  document.querySelectorAll(".seq-slot").forEach((s,i)=>{
-    s.classList.toggle("active",seqSlots[i]===idx&&seqActive);
-  });
+  document.querySelectorAll(".seq-slot").forEach((s,i)=>s.classList.toggle("active",seqSlots[i]===idx&&seqActive));
   if(c.audio){c.audio.pause();c.audio.currentTime=0;}
-  const a=new Audio(c.file);c.audio=a;c.playing=true;
-  updateCartUI(idx);
-  a.addEventListener("ended",()=>{
-    c.playing=false;c.audio=null;updateCartUI(idx);
-    setTimeout(()=>playSeqStep(step+1),250);
-  });
+  const a=new Audio(c.file);c.audio=a;c.playing=true;updateCartUI(idx);
+  a.addEventListener("ended",()=>{c.playing=false;c.audio=null;updateCartUI(idx);setTimeout(()=>playSeqStep(step+1),250);});
   a.play().catch(()=>{});
 }
-
-function stopSequence(){
-  seqActive=false;
-  seqQueue.forEach(idx=>{
-    if(carts[idx]&&carts[idx].audio){carts[idx].audio.pause();carts[idx].audio.currentTime=0;carts[idx].audio=null;}
-    if(carts[idx])carts[idx].playing=false;updateCartUI(idx);
-  });
-  seqQueue=[];
-  document.getElementById("seq-fire").classList.remove("firing");
-  document.getElementById("seq-fire").textContent="▶ FIRE SEQ";
-  document.querySelectorAll(".seq-slot").forEach(s=>s.classList.remove("active"));
-}
-
-function clearSequencer(){
-  stopSequence();
-  seqSlots=[null,null,null,null];
-  renderSeq();
-}
+function stopSequence(){seqActive=false;seqQueue.forEach(idx=>{if(carts[idx]&&carts[idx].audio){carts[idx].audio.pause();carts[idx].audio.currentTime=0;carts[idx].audio=null;}if(carts[idx])carts[idx].playing=false;updateCartUI(idx);});seqQueue=[];document.getElementById("seq-fire").classList.remove("firing");document.getElementById("seq-fire").textContent="▶ FIRE SEQ";document.querySelectorAll(".seq-slot").forEach(s=>s.classList.remove("active"));}
+function clearSequencer(){stopSequence();seqSlots=[null,null,null,null];renderSeq();}
 
 // ══ INIT ══
-async function init(){
-  await restoreState();
-  renderMusicChannels();
-  renderSFX();
-  renderSeq();
-  setupPageTabDrop();
-  updateAMPM();
-}
+async function init(){await restoreState();renderMusicChannels();renderSFX();renderSeq();setupPageTabDrop();updateAMPM();}
 init();
 </script>
 </body>
