@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>A1 Mojo Manager v2.1.5</title>
+<title>A1 Mojo Manager v2.1.6</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Share+Tech+Mono&family=Rajdhani:wght@600;700&display=swap');
 :root {
@@ -339,7 +339,7 @@ body{background:var(--black);font-family:"Share Tech Mono",monospace;color:var(-
   <div id="startup-modal">
     <img id="startup-logo" src="https://bigdaddysikmix.github.io/mojo-manager/A1-logo.png" onerror="this.style.display='none'">
     <div id="startup-title">A1 MOJO MANAGER</div>
-    <div id="startup-sub">AREA MANAGER CONSOLE • v2.1.5</div>
+    <div id="startup-sub">AREA MANAGER CONSOLE • v2.1.6</div>
     <div id="startup-time">--:--:--</div>
     <div id="startup-date">LOADING...</div>
     <div id="startup-msg">
@@ -363,7 +363,7 @@ body{background:var(--black);font-family:"Share Tech Mono",monospace;color:var(-
   <div id="clock-wrap">
     <div id="clock">--:--:--</div>
     <div id="clock-date">...</div>
-    <div id="ver-lbl">MISS RUBY WORLDWIDE • v2.1.5</div>
+    <div id="ver-lbl">MISS RUBY WORLDWIDE • v2.1.6</div>
   </div>
 </div>
 
@@ -436,7 +436,7 @@ body{background:var(--black);font-family:"Share Tech Mono",monospace;color:var(-
 
 <!-- STATUS BAR -->
 <div id="statusbar">
-  <div id="sl">A1 MOJO MANAGER v2.1.5 • MISS RUBY WORLDWIDE LLC • BIG DADDY SIK MIX</div>
+  <div id="sl">A1 MOJO MANAGER v2.1.6 • MISS RUBY WORLDWIDE LLC • BIG DADDY SIK MIX</div>
   <div id="sr">DABBING PUG PRODUCTIONS</div>
 </div>
 
@@ -533,7 +533,7 @@ async function restoreState(){
   const l=localStorage.getItem("a1mojo2_meetlink");if(l)document.getElementById("meet-link").value=l;
   const v=localStorage.getItem("a1mojo2_vidurl");if(v)document.getElementById("vid-url").value=v;
   const saved=getSavedCarts();
-  if(saved){saved.forEach((d,i)=>{if(d&&i<TOTAL){carts[i].name=d.name||null;carts[i].auto=d.auto||false;carts[i].volume=d.volume!=null?d.volume:1.0;carts[i].fadeSpeed=d.fadeSpeed||2000;}});}
+  if(saved){saved.forEach((d,i)=>{if(d&&i<TOTAL){carts[i].name=d.name||null;carts[i].auto=d.auto||false;carts[i].volume=d.volume!=null?d.volume:1.0;carts[i].fadeSpeed=d.fadeSpeed||2000;carts[i]._cleared=d.cleared||false;}});}
   try{
     const h=await getIDB("folder");
     if(h){
@@ -562,19 +562,24 @@ async function loadFromFolder(){
     if(saved){
       for(let i=0;i<TOTAL;i++){
         const s=saved[i];
-        if(s&&s.name&&fileMap[s.name]){
+        if(s&&s.cleared){
+          // Intentionally cleared — mark it and leave empty
+          carts[i]._cleared=true;carts[i].file=null;carts[i].fileHandle=null;carts[i].name=null;
+        } else if(s&&s.name&&fileMap[s.name]){
           const fh=fileMap[s.name];const file=await fh.getFile();
           carts[i].name=s.name;carts[i].file=URL.createObjectURL(file);carts[i].fileHandle=fh;usedNames.add(s.name);
+          carts[i]._cleared=false;
           loadDuration(i,carts[i].file);
-        } else {carts[i].file=null;carts[i].fileHandle=null;if(!s||!s.name)carts[i].name=null;}
+        } else {carts[i].file=null;carts[i].fileHandle=null;if(!s||!s.name)carts[i].name=null;carts[i]._cleared=false;}
       }
       const newNames=Object.keys(fileMap).filter(n=>!usedNames.has(n)).sort();let ni=0;
       for(let i=0;i<TOTAL&&ni<newNames.length;i++){
-        if(!carts[i].file){
+        // Only backfill slots that are empty AND not intentionally cleared
+        if(!carts[i].file&&!carts[i]._cleared){
           const n=newNames[ni++];const fh=fileMap[n];const file=await fh.getFile();
           carts[i].name=n;carts[i].file=URL.createObjectURL(file);carts[i].fileHandle=fh;
           loadDuration(i,carts[i].file);
-        }
+        } else if(carts[i]._cleared){ni;}// skip cleared slots, don't advance file pointer wrong
       }
     } else {
       for(let i=0;i<TOTAL;i++){
@@ -619,7 +624,15 @@ function updateDurationDisplay(idx){
   }
 }
 
-function saveCarts(){try{localStorage.setItem("a1mojo2_carts",JSON.stringify(carts.map(c=>c.name?{name:c.name,auto:c.auto,volume:c.volume,fadeSpeed:c.fadeSpeed}:null)));}catch(e){}}
+function saveCarts(){
+  try{
+    localStorage.setItem("a1mojo2_carts",JSON.stringify(carts.map(c=>{
+      if(c.name)return{name:c.name,auto:c.auto,volume:c.volume,fadeSpeed:c.fadeSpeed};
+      if(c._cleared)return{cleared:true};
+      return null;
+    })));
+  }catch(e){}
+}
 function getSavedCarts(){try{const s=localStorage.getItem("a1mojo2_carts");return s?JSON.parse(s):null;}catch(e){return null;}}
 
 // ══ DRAG/DROP ══
@@ -650,6 +663,7 @@ async function assignFile(idx,file){
   carts[idx].name=file.name.replace(/\.[^/.]+$/,"");
   carts[idx].file=URL.createObjectURL(file);
   carts[idx].fileHandle=null;
+  carts[idx]._cleared=false;
   loadDuration(idx,carts[idx].file);
   saveCarts();
   if(idx<MUSIC_SLOTS)renderMusicChannels();else renderSFX();
@@ -666,13 +680,12 @@ function flashCopied(idx){
 // ══ CLEAR SLOT ══
 function clearCart(idx){
   const c=carts[idx];
-  // Stop if playing
   if(c.playing){
     if(c.fadeInterval){clearInterval(c.fadeInterval);c.fadeInterval=null;}
     if(c.audio){c.audio.pause();c.audio=null;}
     c.playing=false;
   }
-  c.name=null;c.file=null;c.fileHandle=null;c.duration=0;c._queuePos=0;
+  c.name=null;c.file=null;c.fileHandle=null;c.duration=0;c._queuePos=0;c._cleared=true;
   saveCarts();
   if(idx<MUSIC_SLOTS)renderMusicChannels();else renderSFX();
 }
@@ -1020,6 +1033,7 @@ function populateCtxList(filter){
         carts[targetIdx].name=name;
         carts[targetIdx].file=URL.createObjectURL(file);
         carts[targetIdx].fileHandle=fh;
+        carts[targetIdx]._cleared=false;
         loadDuration(targetIdx,carts[targetIdx].file);
         saveCarts();
         if(targetIdx<MUSIC_SLOTS)renderMusicChannels();else renderSFX();
