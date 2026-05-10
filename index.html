@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>A1 Mojo Manager v2.1.4</title>
+<title>A1 Mojo Manager v2.1.5</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Share+Tech+Mono&family=Rajdhani:wght@600;700&display=swap');
 :root {
@@ -339,7 +339,7 @@ body{background:var(--black);font-family:"Share Tech Mono",monospace;color:var(-
   <div id="startup-modal">
     <img id="startup-logo" src="https://bigdaddysikmix.github.io/mojo-manager/A1-logo.png" onerror="this.style.display='none'">
     <div id="startup-title">A1 MOJO MANAGER</div>
-    <div id="startup-sub">AREA MANAGER CONSOLE • v2.1.4</div>
+    <div id="startup-sub">AREA MANAGER CONSOLE • v2.1.5</div>
     <div id="startup-time">--:--:--</div>
     <div id="startup-date">LOADING...</div>
     <div id="startup-msg">
@@ -363,7 +363,7 @@ body{background:var(--black);font-family:"Share Tech Mono",monospace;color:var(-
   <div id="clock-wrap">
     <div id="clock">--:--:--</div>
     <div id="clock-date">...</div>
-    <div id="ver-lbl">MISS RUBY WORLDWIDE • v2.1.4</div>
+    <div id="ver-lbl">MISS RUBY WORLDWIDE • v2.1.5</div>
   </div>
 </div>
 
@@ -436,7 +436,7 @@ body{background:var(--black);font-family:"Share Tech Mono",monospace;color:var(-
 
 <!-- STATUS BAR -->
 <div id="statusbar">
-  <div id="sl">A1 MOJO MANAGER v2.1.4 • MISS RUBY WORLDWIDE LLC • BIG DADDY SIK MIX</div>
+  <div id="sl">A1 MOJO MANAGER v2.1.5 • MISS RUBY WORLDWIDE LLC • BIG DADDY SIK MIX</div>
   <div id="sr">DABBING PUG PRODUCTIONS</div>
 </div>
 
@@ -555,6 +555,8 @@ async function loadFromFolder(){
     // Store for context menu
     allFolderFilesWithExt=files.map(f=>f.name);
     allFolderFiles=files.map(f=>f.name.replace(/\.[^/.]+$/,""));
+    allFolderHandleMap={};
+    files.forEach(fh=>{allFolderHandleMap[fh.name.replace(/\.[^/.]+$/,"")]=fh;});
     const fileMap={};files.forEach(fh=>{fileMap[fh.name.replace(/\.[^/.]+$/,"")]=fh;});
     const saved=getSavedCarts();const usedNames=new Set();
     if(saved){
@@ -1002,20 +1004,18 @@ function showCtxMenu(e,idx){
 }
 function populateCtxList(filter){
   ctxList.innerHTML="";
-  // Collect all file names from the folder via carts that have fileHandle, plus scan allFolderFiles
   const names=allFolderFiles.filter(n=>n.toLowerCase().includes(filter.toLowerCase())).sort();
   if(names.length===0){
     const empty=document.createElement("div");empty.className="ctx-empty";empty.textContent="no files found";ctxList.appendChild(empty);return;
   }
   names.forEach(name=>{
-    const fullName=allFolderFilesWithExt.find(f=>f.replace(/\.[^/.]+$/,"")=== name)||name;
     const item=document.createElement("div");item.className="ctx-item";item.textContent=name;
     item.onclick=async()=>{
       const targetIdx=ctxTargetIdx;
       closeCtxMenu();
-      if(!dirHandle)return;
+      const fh=allFolderHandleMap[name];
+      if(!fh){console.log("ctx: no handle for",name);return;}
       try{
-        const fh=await dirHandle.getFileHandle(fullName);
         const file=await fh.getFile();
         carts[targetIdx].name=name;
         carts[targetIdx].file=URL.createObjectURL(file);
@@ -1023,7 +1023,7 @@ function populateCtxList(filter){
         loadDuration(targetIdx,carts[targetIdx].file);
         saveCarts();
         if(targetIdx<MUSIC_SLOTS)renderMusicChannels();else renderSFX();
-      }catch(err){console.log("ctx pick failed:",err.message);}
+      }catch(err){console.log("ctx load failed:",err.message);}
     };
     ctxList.appendChild(item);
   });
@@ -1041,6 +1041,7 @@ document.addEventListener("keydown",e=>{if(e.key==="Escape")closeCtxMenu();});
 // Store folder file list for context menu use
 let allFolderFiles=[];      // names without extension
 let allFolderFilesWithExt=[];// full filenames
+let allFolderHandleMap={};  // name-without-ext -> fileHandle
 
 // ══ INIT ══
 async function init(){await restoreState();renderMusicChannels();renderSFX();renderSeq();setupPageTabDrop();updateAMPM();}
