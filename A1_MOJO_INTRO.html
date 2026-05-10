@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>A1 Mojo Manager — INTRO</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Share+Tech+Mono&family=Rajdhani:wght@600;700&display=swap');
+
+*{margin:0;padding:0;box-sizing:border-box;}
+body{
+  background:#0a0a0a;
+  font-family:"Share Tech Mono",monospace;
+  height:100vh;width:100vw;
+  display:flex;align-items:center;justify-content:center;
+  overflow:hidden;
+  position:relative;
+}
+
+/* scanline effect */
+body::after{
+  content:"";position:fixed;inset:0;
+  background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.08) 2px,rgba(0,0,0,0.08) 4px);
+  pointer-events:none;z-index:9999;
+}
+
+/* background grid */
+body::before{
+  content:"";position:fixed;inset:0;
+  background-image:linear-gradient(rgba(204,0,0,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(204,0,0,0.04) 1px,transparent 1px);
+  background-size:40px 40px;
+  pointer-events:none;
+}
+
+/* ══ WINDOWS ERROR POPUP ══ */
+#error-popup{
+  position:fixed;inset:0;display:flex;align-items:center;justify-content:center;
+  z-index:1000;background:rgba(0,0,0,0.85);
+}
+.win-dialog{
+  background:#c0c0c0;
+  border:2px solid #fff;
+  border-right-color:#555;
+  border-bottom-color:#555;
+  width:420px;
+  font-family:"Share Tech Mono",monospace;
+  box-shadow:4px 4px 0 #000;
+}
+.win-titlebar{
+  background:linear-gradient(90deg,#000080,#1084d0);
+  padding:4px 6px;
+  display:flex;align-items:center;justify-content:space-between;
+  color:#fff;font-size:12px;font-weight:bold;
+}
+.win-titlebar-btns{display:flex;gap:2px;}
+.win-btn{
+  width:16px;height:14px;background:#c0c0c0;
+  border:1px solid #fff;border-right-color:#555;border-bottom-color:#555;
+  display:flex;align-items:center;justify-content:center;
+  font-size:9px;color:#000;cursor:pointer;font-weight:bold;
+}
+.win-body{padding:16px;display:flex;gap:14px;align-items:flex-start;}
+.win-icon{font-size:36px;flex-shrink:0;margin-top:4px;}
+.win-text{font-size:12px;color:#000;line-height:1.7;}
+.win-text strong{display:block;margin-bottom:8px;font-size:13px;}
+.win-footer{padding:10px 16px;display:flex;justify-content:center;gap:8px;border-top:1px solid #888;}
+.win-ok{
+  padding:4px 20px;background:#c0c0c0;
+  border:2px solid #fff;border-right-color:#555;border-bottom-color:#555;
+  font-family:"Share Tech Mono",monospace;font-size:12px;color:#000;
+  cursor:pointer;min-width:80px;text-align:center;
+}
+.win-ok:hover{background:#d0d0d0;}
+.win-ok:active{border-color:#555;border-right-color:#fff;border-bottom-color:#fff;}
+
+/* ══ MAIN LOADING SCREEN ══ */
+#loading-screen{
+  display:none;flex-direction:column;align-items:center;justify-content:center;
+  width:100%;height:100%;gap:0;
+}
+
+.logo-area{text-align:center;margin-bottom:40px;}
+.logo-title{
+  font-family:"Bebas Neue",sans-serif;font-size:72px;color:#fff;
+  letter-spacing:8px;line-height:1;
+  text-shadow:0 0 40px rgba(204,0,0,0.8),0 0 80px rgba(204,0,0,0.4);
+}
+.logo-sub{
+  font-family:"Bebas Neue",sans-serif;font-size:18px;color:#cc0000;
+  letter-spacing:6px;margin-top:4px;
+}
+
+.loading-box{
+  width:560px;background:#0d0000;border:1px solid #330000;border-radius:4px;
+  padding:28px 32px;
+}
+
+.load-item{margin-bottom:22px;opacity:0;transition:opacity 0.3s;}
+.load-item.visible{opacity:1;}
+.load-label{
+  font-family:"Rajdhani",sans-serif;font-weight:700;font-size:15px;
+  color:#dddddd;letter-spacing:1px;margin-bottom:6px;
+  display:flex;justify-content:space-between;align-items:center;
+}
+.load-pct{color:#cc0000;font-family:"Share Tech Mono",monospace;font-size:13px;}
+.load-track{
+  width:100%;height:18px;background:#0a0a0a;
+  border:1px solid #2a0000;border-radius:2px;overflow:hidden;position:relative;
+}
+.load-bar{
+  height:100%;width:0%;background:linear-gradient(90deg,#880000,#cc0000,#ff3030);
+  border-radius:2px;transition:width 0.05s linear;position:relative;
+  box-shadow:0 0 8px rgba(255,48,48,0.4);
+}
+.load-bar::after{
+  content:"";position:absolute;inset:0;
+  background:repeating-linear-gradient(90deg,transparent,transparent 8px,rgba(255,255,255,0.05) 8px,rgba(255,255,255,0.05) 9px);
+}
+
+/* management patience special */
+.load-bar.stall{background:linear-gradient(90deg,#444400,#888800,#aaaa00);}
+.load-bar.stall-done{background:linear-gradient(90deg,#880000,#cc0000,#ff3030);}
+
+/* tommy mello — gold/orange */
+.load-bar.tommy{background:linear-gradient(90deg,#884400,#cc6600,#ff9900);box-shadow:0 0 12px rgba(255,150,0,0.5);}
+
+/* garage door — instant green */
+.load-bar.instant{background:linear-gradient(90deg,#004400,#00aa00,#00ff44);box-shadow:0 0 8px rgba(0,255,68,0.4);transition:width 0.15s linear;}
+
+/* ══ FINISH SCREEN ══ */
+#finish-screen{
+  display:none;flex-direction:column;align-items:center;justify-content:center;
+  width:100%;height:100%;text-align:center;
+}
+.finish-title{
+  font-family:"Bebas Neue",sans-serif;font-size:90px;color:#fff;
+  letter-spacing:10px;line-height:1;
+  text-shadow:0 0 60px rgba(0,204,68,0.9),0 0 120px rgba(0,204,68,0.4);
+  animation:finishpulse 1.5s infinite;
+}
+@keyframes finishpulse{
+  0%,100%{text-shadow:0 0 60px rgba(0,204,68,0.9),0 0 120px rgba(0,204,68,0.4);}
+  50%{text-shadow:0 0 100px rgba(0,255,85,1),0 0 200px rgba(0,255,85,0.6);}
+}
+.finish-sub{
+  font-family:"Bebas Neue",sans-serif;font-size:28px;color:#00cc44;
+  letter-spacing:6px;margin-top:12px;
+}
+.finish-sub2{
+  font-family:"Share Tech Mono",monospace;font-size:12px;color:#444;
+  letter-spacing:3px;margin-top:20px;
+}
+.finish-click{
+  margin-top:40px;padding:14px 40px;
+  background:#002200;border:2px solid #00cc44;border-radius:4px;
+  color:#00cc44;font-family:"Bebas Neue",sans-serif;font-size:22px;letter-spacing:4px;
+  cursor:pointer;transition:all 0.2s;
+}
+.finish-click:hover{background:#00cc44;color:#000;}
+
+/* flicker animation */
+@keyframes flicker{
+  0%,95%,100%{opacity:1;}96%{opacity:0.4;}98%{opacity:0.8;}
+}
+.logo-title{animation:flicker 4s infinite;}
+</style>
+</head>
+<body>
+
+<!-- WINDOWS ERROR POPUP -->
+<div id="error-popup">
+  <div class="win-dialog">
+    <div class="win-titlebar">
+      <span>⚠ System Warning</span>
+      <div class="win-titlebar-btns">
+        <div class="win-btn">_</div>
+        <div class="win-btn">□</div>
+        <div class="win-btn">✕</div>
+      </div>
+    </div>
+    <div class="win-body">
+      <div class="win-icon">⚠️</div>
+      <div class="win-text">
+        <strong>WARNING: Excessive MOJO Detected</strong>
+        This application contains dangerously high levels of MOJO.<br><br>
+        Side effects may include:<br>
+        — Uncontrollable motivation<br>
+        — Spontaneous high-fives<br>
+        — Sudden desire to crush your KPIs<br><br>
+        Proceed only if you can handle it.
+      </div>
+    </div>
+    <div class="win-footer">
+      <div class="win-ok" onclick="startLoading()">I Can Handle It</div>
+      <div class="win-ok" onclick="startLoading()">OK</div>
+    </div>
+  </div>
+</div>
+
+<!-- LOADING SCREEN -->
+<div id="loading-screen">
+  <div class="logo-area">
+    <div class="logo-title">A1 MOJO MANAGER</div>
+    <div class="logo-sub">AREA MANAGER CONSOLE — INITIALIZING SYSTEMS</div>
+  </div>
+  <div class="loading-box">
+    <div class="load-item" id="item-0">
+      <div class="load-label">Loading JD's Ego...<span class="load-pct" id="pct-0">0%</span></div>
+      <div class="load-track"><div class="load-bar" id="bar-0"></div></div>
+    </div>
+    <div class="load-item" id="item-1">
+      <div class="load-label">Loading Unnecessary Sound Effects...<span class="load-pct" id="pct-1">0%</span></div>
+      <div class="load-track"><div class="load-bar" id="bar-1"></div></div>
+    </div>
+    <div class="load-item" id="item-2">
+      <div class="load-label">Loading Management's Patience...<span class="load-pct" id="pct-2">0%</span></div>
+      <div class="load-track"><div class="load-bar stall" id="bar-2"></div></div>
+    </div>
+    <div class="load-item" id="item-3">
+      <div class="load-label">Loading Tommy Mello's Vision... ON STEROIDS<span class="load-pct" id="pct-3">0%</span></div>
+      <div class="load-track"><div class="load-bar tommy" id="bar-3"></div></div>
+    </div>
+    <div class="load-item" id="item-4">
+      <div class="load-label">Loading Garage Door Knowledge...<span class="load-pct" id="pct-4">0%</span></div>
+      <div class="load-track"><div class="load-bar instant" id="bar-4"></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- FINISH SCREEN -->
+<div id="finish-screen">
+  <div class="finish-title">SYSTEM READY</div>
+  <div class="finish-sub">LET'S GET MOJO</div>
+  <div class="finish-sub2">ALL SYSTEMS NOMINAL • MOJO LEVELS: CRITICAL • EXCUSES: NONE</div>
+  <div class="finish-click" onclick="window.close()">LAUNCH THE BOARD →</div>
+</div>
+
+<script>
+function startLoading(){
+  document.getElementById("error-popup").style.display="none";
+  const ls=document.getElementById("loading-screen");
+  ls.style.display="flex";
+  runSequence();
+}
+
+// Each item: [itemIdx, targetPct, speed(ms per tick), tickAmt, barClass, stallAt, stallDuration]
+const sequence=[
+  {idx:0, target:100, tickMs:18, tickAmt:1, stall:null},        // JD ego — steady
+  {idx:1, target:100, tickMs:22, tickAmt:1, stall:null},        // sound effects
+  {idx:2, target:100, tickMs:25, tickAmt:1, stall:12, stallMs:2200, barClass:"stall", doneClass:"stall-done"}, // patience stalls
+  {idx:3, target:100, tickMs:14, tickAmt:1, stall:null, barClass:"tommy"}, // tommy — fast and hot
+  {idx:4, target:100, tickMs:2,  tickAmt:5, stall:null, barClass:"instant"}, // garage door — instant
+];
+
+async function runSequence(){
+  for(let s of sequence){
+    await runBar(s);
+    await sleep(300);
+  }
+  await sleep(600);
+  showFinish();
+}
+
+function runBar(s){
+  return new Promise(resolve=>{
+    const item=document.getElementById("item-"+s.idx);
+    const bar=document.getElementById("bar-"+s.idx);
+    const pct=document.getElementById("pct-"+s.idx);
+    item.classList.add("visible");
+    let current=0;
+    let stalled=false;
+
+    function tick(){
+      if(s.stall&&current>=s.stall&&!stalled){
+        stalled=true;
+        // pause at stall point
+        setTimeout(()=>{
+          // rocket to 100
+          bar.classList.remove(s.barClass||"");
+          bar.classList.add(s.doneClass||"load-bar");
+          fastFinish();
+        },s.stallMs);
+        return;
+      }
+      current=Math.min(current+s.tickAmt, s.target);
+      bar.style.width=current+"%";
+      pct.textContent=current+"%";
+      if(current<s.target&&!stalled){
+        setTimeout(tick,s.tickMs);
+      } else if(current>=s.target){
+        resolve();
+      }
+    }
+
+    function fastFinish(){
+      let fc=parseInt(bar.style.width)||s.stall;
+      const fi=setInterval(()=>{
+        fc=Math.min(fc+2,100);
+        bar.style.width=fc+"%";
+        pct.textContent=fc+"%";
+        if(fc>=100){clearInterval(fi);resolve();}
+      },12);
+    }
+
+    tick();
+  });
+}
+
+function sleep(ms){return new Promise(r=>setTimeout(r,ms));}
+
+function showFinish(){
+  document.getElementById("loading-screen").style.display="none";
+  const fs=document.getElementById("finish-screen");
+  fs.style.display="flex";
+}
+</script>
+</body>
+</html>
