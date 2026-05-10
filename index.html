@@ -1011,17 +1011,18 @@ function populateCtxList(filter){
     const fullName=allFolderFilesWithExt.find(f=>f.replace(/\.[^/.]+$/,"")=== name)||name;
     const item=document.createElement("div");item.className="ctx-item";item.textContent=name;
     item.onclick=async()=>{
+      const targetIdx=ctxTargetIdx;
       closeCtxMenu();
       if(!dirHandle)return;
       try{
         const fh=await dirHandle.getFileHandle(fullName);
         const file=await fh.getFile();
-        carts[ctxTargetIdx].name=name;
-        carts[ctxTargetIdx].file=URL.createObjectURL(file);
-        carts[ctxTargetIdx].fileHandle=fh;
-        loadDuration(ctxTargetIdx,carts[ctxTargetIdx].file);
+        carts[targetIdx].name=name;
+        carts[targetIdx].file=URL.createObjectURL(file);
+        carts[targetIdx].fileHandle=fh;
+        loadDuration(targetIdx,carts[targetIdx].file);
         saveCarts();
-        if(ctxTargetIdx<MUSIC_SLOTS)renderMusicChannels();else renderSFX();
+        if(targetIdx<MUSIC_SLOTS)renderMusicChannels();else renderSFX();
       }catch(err){console.log("ctx pick failed:",err.message);}
     };
     ctxList.appendChild(item);
