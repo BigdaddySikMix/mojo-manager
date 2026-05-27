@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>A1 Mojo Manager v2.1.11</title>
+<title>A1 Mojo Manager v2.1.12</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Share+Tech+Mono&family=Rajdhani:wght@600;700&display=swap');
 :root {
@@ -355,7 +355,7 @@ body{background:var(--black);font-family:"Share Tech Mono",monospace;color:var(-
   <div id="startup-modal">
     <img id="startup-logo" src="https://bigdaddysikmix.github.io/mojo-manager/A1-logo.png" onerror="this.style.display='none'">
     <div id="startup-title">A1 MOJO MANAGER</div>
-    <div id="startup-sub">AREA MANAGER CONSOLE • v2.1.11</div>
+    <div id="startup-sub">AREA MANAGER CONSOLE • v2.1.12</div>
     <div id="startup-time">--:--:--</div>
     <div id="startup-date">LOADING...</div>
     <div id="startup-msg">
@@ -379,7 +379,7 @@ body{background:var(--black);font-family:"Share Tech Mono",monospace;color:var(-
   <div id="clock-wrap">
     <div id="clock">--:--:--</div>
     <div id="clock-date">...</div>
-    <div id="ver-lbl">v2.1.11</div>
+    <div id="ver-lbl">v2.1.12</div>
   </div>
 </div>
 
@@ -527,7 +527,7 @@ body{background:var(--black);font-family:"Share Tech Mono",monospace;color:var(-
 
 <!-- STATUS BAR -->
 <div id="statusbar">
-  <div id="sl">A1 MOJO MANAGER v2.1.11 • DABBING PUG PRODUCTIONS</div>
+  <div id="sl">A1 MOJO MANAGER v2.1.12 • DABBING PUG PRODUCTIONS</div>
   <div id="sr">A1 GARAGE DOOR SERVICE</div>
 </div>
 
@@ -1158,59 +1158,60 @@ function playSeqStep(step){
   if(c.audio){c.audio.pause();c.audio.currentTime=0;}
   const a=new Audio(c.file);c.audio=a;c.playing=true;updateCartUI(idx);
 
-  // Honor inPoint
   const startPos=c.inPoint||0;
-  if(startPos>0){a.addEventListener("loadedmetadata",()=>{a.currentTime=startPos;},{once:true});}
-
-  // Honor outPoint and cuePoint
   const cuePos=c.cuePoint>0?c.cuePoint:0;
   const outPos=c.outPoint>0?c.outPoint:0;
   let cueWatcher=null;
   let outWatcher=null;
+  let advanced=false;
 
-  function seqAdvance(){
+  // Fix stutter: set currentTime BEFORE play, not via loadedmetadata
+  if(startPos>0){
+    a.addEventListener("canplay",()=>{
+      if(a.currentTime<startPos)a.currentTime=startPos;
+    },{once:true});
+  }
+
+  function seqAdvance(reason){
+    if(advanced)return;
+    advanced=true;
     if(cueWatcher)clearInterval(cueWatcher);
     if(outWatcher)clearInterval(outWatcher);
     if(!seqActive)return;
-    // 1-second fast fade then fire next
-    const startVol=a.volume;const steps=20;const stepTime=50;let step2=0;
-    const fadeOut=setInterval(()=>{
-      step2++;a.volume=Math.max(0,startVol*(1-step2/steps));
-      if(step2>=steps){
-        clearInterval(fadeOut);
-        if(c.audio){c.audio.pause();c.audio=null;}
-        c.playing=false;updateCartUI(idx);
-        setTimeout(()=>playSeqStep(step+1),50);
-      }
-    },stepTime);
+    if(reason==="cue"){
+      // 1-second fast fade then fire next
+      const startVol=a.volume;const steps=20;const stepTime=50;let s2=0;
+      const fadeOut=setInterval(()=>{
+        s2++;a.volume=Math.max(0,startVol*(1-s2/steps));
+        if(s2>=steps){
+          clearInterval(fadeOut);
+          if(c.audio){c.audio.pause();c.audio=null;}
+          c.playing=false;updateCartUI(idx);
+          setTimeout(()=>playSeqStep(step+1),50);
+        }
+      },stepTime);
+    } else {
+      if(c.audio){c.audio.pause();c.audio=null;}
+      c.playing=false;updateCartUI(idx);
+      setTimeout(()=>playSeqStep(step+1),250);
+    }
   }
 
   if(cuePos>0){
     cueWatcher=setInterval(()=>{
       if(!c.audio||!c.playing||!seqActive){clearInterval(cueWatcher);return;}
-      if(c.audio.currentTime>=cuePos){clearInterval(cueWatcher);seqAdvance();}
+      if(c.audio.currentTime>=cuePos){clearInterval(cueWatcher);seqAdvance("cue");}
     },50);
   }
 
   if(outPos>0){
     outWatcher=setInterval(()=>{
       if(!c.audio||!c.playing||!seqActive){clearInterval(outWatcher);return;}
-      if(c.audio.currentTime>=outPos){
-        clearInterval(outWatcher);
-        if(cueWatcher)clearInterval(cueWatcher);
-        if(c.audio){c.audio.pause();c.audio=null;}
-        c.playing=false;updateCartUI(idx);
-        setTimeout(()=>playSeqStep(step+1),250);
-      }
+      if(c.audio.currentTime>=outPos){clearInterval(outWatcher);seqAdvance("out");}
     },50);
   }
 
-  a.addEventListener("ended",()=>{
-    if(cueWatcher)clearInterval(cueWatcher);
-    if(outWatcher)clearInterval(outWatcher);
-    c.playing=false;c.audio=null;updateCartUI(idx);
-    setTimeout(()=>playSeqStep(step+1),250);
-  });
+  a.addEventListener("ended",()=>{seqAdvance("ended");});
   a.play().catch(()=>{});
 }
 function stopSequence(){seqActive=false;seqQueue.forEach(idx=>{if(carts[idx]&&carts[idx].audio){carts[idx].audio.pause();carts[idx].audio.currentTime=0;carts[idx].audio=null;}if(carts[idx])carts[idx].playing=false;updateCartUI(idx);});seqQueue=[];document.getElementById("seq-fire").classList.remove("firing");document.getElementById("seq-fire").textContent="▶ FIRE SEQ";document.querySelectorAll(".seq-slot").forEach(s=>s.classList.remove("active"));}
