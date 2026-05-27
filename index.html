@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>A1 Mojo Manager v2.1.14</title>
+<title>A1 Mojo Manager v2.1.15</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Share+Tech+Mono&family=Rajdhani:wght@600;700&display=swap');
 :root {
@@ -372,7 +372,7 @@ body{background:var(--black);font-family:"Share Tech Mono",monospace;color:var(-
   <div id="startup-modal">
     <img id="startup-logo" src="https://bigdaddysikmix.github.io/mojo-manager/A1-logo.png" onerror="this.style.display='none'">
     <div id="startup-title">A1 MOJO MANAGER</div>
-    <div id="startup-sub">AREA MANAGER CONSOLE • v2.1.14</div>
+    <div id="startup-sub">AREA MANAGER CONSOLE • v2.1.15</div>
     <div id="startup-time">--:--:--</div>
     <div id="startup-date">LOADING...</div>
     <div id="startup-msg">
@@ -396,7 +396,7 @@ body{background:var(--black);font-family:"Share Tech Mono",monospace;color:var(-
   <div id="clock-wrap">
     <div id="clock">--:--:--</div>
     <div id="clock-date">...</div>
-    <div id="ver-lbl">v2.1.14</div>
+    <div id="ver-lbl">v2.1.15</div>
   </div>
 </div>
 
@@ -544,7 +544,7 @@ body{background:var(--black);font-family:"Share Tech Mono",monospace;color:var(-
 
 <!-- STATUS BAR -->
 <div id="statusbar">
-  <div id="sl">A1 MOJO MANAGER v2.1.14 • DABBING PUG PRODUCTIONS</div>
+  <div id="sl">A1 MOJO MANAGER v2.1.15 • DABBING PUG PRODUCTIONS</div>
   <div id="sr">A1 GARAGE DOOR SERVICE</div>
 </div>
 
@@ -1439,15 +1439,20 @@ function triggerSFXFade(idx){
 // ══ SLOT CHOICE MENU (loaded slot right-click) ══
 function showSlotChoiceMenu(e,idx){
   closeAllMenus();
+  const clickX=e.clientX,clickY=e.clientY;
   const menu=document.createElement("div");
   menu.id="slot-choice-menu";
   menu.style.cssText=`position:fixed;z-index:9200;background:#1a1a1a;border:1px solid #555;
     border-radius:4px;padding:4px 0;min-width:180px;box-shadow:0 4px 20px rgba(0,0,0,0.8);`;
-  menu.style.left=Math.min(e.clientX,window.innerWidth-200)+"px";
-  menu.style.top=Math.min(e.clientY,window.innerHeight-100)+"px";
+  menu.style.left=Math.min(clickX,window.innerWidth-200)+"px";
+  menu.style.top=Math.min(clickY,window.innerHeight-100)+"px";
   const items=[
     {label:"✂  Open Trim / Cue Editor",fn:()=>openEditor(idx,false)},
-    {label:"📁  Change File",fn:()=>showCtxMenu(e,idx)},
+    {label:"📁  Change File",fn:()=>{
+      // Synthesize a fake event with the saved position so ctx menu appears in right place
+      const fakeE={clientX:clickX,clientY:clickY,preventDefault:()=>{}};
+      showCtxMenu(fakeE,idx);
+    }},
   ];
   items.forEach(({label,fn})=>{
     const item=document.createElement("div");
@@ -1507,10 +1512,18 @@ function showPagePreview(tab,pageIdx){
       row.append(n,nm);preview.appendChild(row);
     });
   }
-  const rect=tab.getBoundingClientRect();
-  preview.style.left=rect.left+"px";
-  preview.style.top=(rect.bottom+4)+"px";
   document.body.appendChild(preview);
+  // Position: above the tab, aligned to right edge of tab so it doesn't go off screen
+  const rect=tab.getBoundingClientRect();
+  const previewW=240;
+  let left=rect.right-previewW;
+  if(left<4)left=4;
+  preview.style.left=left+"px";
+  preview.style.top=(rect.top-preview.offsetHeight-4)+"px";
+  // If it goes off top of screen, show below instead
+  if(rect.top-preview.offsetHeight-4<4){
+    preview.style.top=(rect.bottom+4)+"px";
+  }
   previewEl=preview;
 }
 
@@ -1555,7 +1568,9 @@ let editorOutPct=1;
 let editorCuePct=0.5;
 let editorHasCue=false;
 let editorAnimFrame=null;
-let editorDragging=null; // 'in','out','cue'
+let editorDragging=null;
+let editorZoom=1;
+let editorZoomOffset=0;
 
 function openEditor(idx,cueMode){
   const c=carts[idx];
@@ -1564,6 +1579,8 @@ function openEditor(idx,cueMode){
   editorCueMode=cueMode;
   editorPlaying=false;
   editorDuration=c.duration||0;
+  editorZoom=1;editorZoomOffset=0;
+  editorDecodedBuffer=null;
 
   // Restore saved points or defaults
   editorInPct=c.inPoint>0&&editorDuration>0?c.inPoint/editorDuration:0;
@@ -1600,12 +1617,17 @@ function buildTicks(){
   const el=document.getElementById("ed-ticks");el.innerHTML="";
   if(!editorDuration)return;
   const count=8;
+  const visStart=editorZoomOffset*editorDuration;
+  const visEnd=(editorZoomOffset+1/editorZoom)*editorDuration;
   for(let i=0;i<=count;i++){
     const t=document.createElement("span");
-    t.textContent=fmtTime((i/count)*editorDuration);
+    t.textContent=fmtTime(visStart+(i/count)*(visEnd-visStart));
     el.appendChild(t);
   }
 }
+
+// Store decoded audio buffer for zoom redraws
+let editorDecodedBuffer=null;
 
 function drawWaveform(src){
   const canvas=document.getElementById("ed-waveform");
@@ -1614,41 +1636,44 @@ function drawWaveform(src){
   canvas.width=canvas.offsetWidth||640;
   canvas.height=canvas.offsetHeight||56;
   ctx.clearRect(0,0,canvas.width,canvas.height);
-
-  // Draw a placeholder line while loading
   ctx.strokeStyle="#330000";ctx.lineWidth=1;
   ctx.beginPath();ctx.moveTo(0,canvas.height/2);ctx.lineTo(canvas.width,canvas.height/2);ctx.stroke();
 
-  // Decode audio for real waveform
-  fetch(src).then(r=>r.arrayBuffer()).then(buf=>{
-    const ac=new (window.AudioContext||window.webkitAudioContext)();
-    return ac.decodeAudioData(buf);
-  }).then(decoded=>{
+  function renderBuffer(decoded){
+    editorDecodedBuffer=decoded;
     const data=decoded.getChannelData(0);
     const W=canvas.width,H=canvas.height;
-    const step=Math.ceil(data.length/W);
+    // Only draw the visible zoom window
+    const startSample=Math.floor(editorZoomOffset*data.length);
+    const endSample=Math.floor((editorZoomOffset+1/editorZoom)*data.length);
+    const visibleLen=endSample-startSample;
+    const step=Math.max(1,Math.ceil(visibleLen/W));
     ctx.clearRect(0,0,W,H);
-    ctx.strokeStyle="#882222";ctx.lineWidth=1;
-    ctx.beginPath();
+    ctx.strokeStyle="#882222";ctx.lineWidth=1;ctx.beginPath();
     for(let x=0;x<W;x++){
-      let max=0;
-      for(let j=0;j<step;j++){const v=Math.abs(data[x*step+j]||0);if(v>max)max=v;}
-      const h=max*(H/2)*0.9;
-      ctx.moveTo(x,H/2-h);ctx.lineTo(x,H/2+h);
+      const si=startSample+Math.floor(x*visibleLen/W);
+      let max=0;for(let j=0;j<step;j++){const v=Math.abs(data[si+j]||0);if(v>max)max=v;}
+      const h=max*(H/2)*0.9;ctx.moveTo(x,H/2-h);ctx.lineTo(x,H/2+h);
     }
     ctx.stroke();
-  }).catch(()=>{});
+  }
+
+  if(editorDecodedBuffer){renderBuffer(editorDecodedBuffer);return;}
+  fetch(src).then(r=>r.arrayBuffer()).then(buf=>{
+    const ac=new(window.AudioContext||window.webkitAudioContext)();
+    return ac.decodeAudioData(buf);
+  }).then(renderBuffer).catch(()=>{});
 }
 
 function updateEditorMarkers(){
+  function toDisplay(audioPct){return Math.max(0,Math.min(1,(audioPct-editorZoomOffset)*editorZoom));}
   const setM=(id,pct)=>{const el=document.getElementById(id);if(el)el.style.left=(pct*100)+"%";};
-  const setF=(id,pct,offset=0)=>{const el=document.getElementById(id);if(el)el.style.left="calc("+( pct*100)+"% + "+offset+"px)";};
+  const setF=(id,pct,off=0)=>{const el=document.getElementById(id);if(el)el.style.left="calc("+(pct*100)+"% + "+off+"px)";};
   const setL=(id,pct)=>{const el=document.getElementById(id);if(el)el.style.left=(pct*100)+"%";};
-  setM("ed-in-marker",editorInPct);setF("ed-in-flag",editorInPct);setL("ed-lbl-in",editorInPct);
-  setM("ed-out-marker",editorOutPct);setF("ed-out-flag",editorOutPct,-6);setL("ed-lbl-out",editorOutPct);
-  if(editorHasCue){
-    setM("ed-cue-marker",editorCuePct);setF("ed-cue-flag",editorCuePct);setL("ed-lbl-cue",editorCuePct);
-  }
+  const dIn=toDisplay(editorInPct),dOut=toDisplay(editorOutPct),dCue=toDisplay(editorCuePct);
+  setM("ed-in-marker",dIn);setF("ed-in-flag",dIn);setL("ed-lbl-in",dIn);
+  setM("ed-out-marker",dOut);setF("ed-out-flag",dOut,-6);setL("ed-lbl-out",dOut);
+  if(editorHasCue){setM("ed-cue-marker",dCue);setF("ed-cue-flag",dCue);setL("ed-lbl-cue",dCue);}
 }
 
 function updateEditorPointDisplay(){
@@ -1664,35 +1689,56 @@ function updateEditorPointDisplay(){
 function setupEditorDrag(){
   const tl=document.getElementById("ed-timeline");
   if(!tl)return;
+
+  // Convert raw click pct on timeline to actual audio pct accounting for zoom
+  function rawToAudio(rawPct){return editorZoomOffset + rawPct*(1/editorZoom);}
+  function audioToRaw(audioPct){return (audioPct-editorZoomOffset)*editorZoom;}
+
   tl.onmousedown=e=>{
     const rect=tl.getBoundingClientRect();
-    const pct=(e.clientX-rect.left)/rect.width;
-    // Determine which marker is closest
-    const dIn=Math.abs(pct-editorInPct);
-    const dOut=Math.abs(pct-editorOutPct);
-    const dCue=editorHasCue?Math.abs(pct-editorCuePct):999;
+    const rawPct=(e.clientX-rect.left)/rect.width;
+    const audioPct=rawToAudio(rawPct);
+    const dIn=Math.abs(audioToRaw(editorInPct)-rawPct);
+    const dOut=Math.abs(audioToRaw(editorOutPct)-rawPct);
+    const dCue=editorHasCue?Math.abs(audioToRaw(editorCuePct)-rawPct):999;
     const minD=Math.min(dIn,dOut,dCue);
     if(minD<0.05){
       if(minD===dIn)editorDragging="in";
       else if(minD===dOut)editorDragging="out";
       else editorDragging="cue";
     } else {
-      // Click to seek playback position
-      if(editorAudio)editorAudio.currentTime=pct*editorDuration;
+      if(editorAudio)editorAudio.currentTime=Math.max(0,Math.min(editorDuration,audioPct*editorDuration));
     }
     e.preventDefault();
   };
+
   document.onmousemove=e=>{
     if(!editorDragging)return;
     const tl2=document.getElementById("ed-timeline");if(!tl2)return;
     const rect=tl2.getBoundingClientRect();
-    let pct=Math.max(0,Math.min(1,(e.clientX-rect.left)/rect.width));
-    if(editorDragging==="in"){editorInPct=Math.min(pct,editorOutPct-0.01);}
-    else if(editorDragging==="out"){editorOutPct=Math.max(pct,editorInPct+0.01);}
-    else if(editorDragging==="cue"){editorCuePct=Math.max(editorInPct,Math.min(editorOutPct,pct));}
+    const rawPct=Math.max(0,Math.min(1,(e.clientX-rect.left)/rect.width));
+    const audioPct=Math.max(0,Math.min(1,rawToAudio(rawPct)));
+    if(editorDragging==="in")editorInPct=Math.min(audioPct,editorOutPct-0.005);
+    else if(editorDragging==="out")editorOutPct=Math.max(audioPct,editorInPct+0.005);
+    else if(editorDragging==="cue")editorCuePct=Math.max(editorInPct,Math.min(editorOutPct,audioPct));
     updateEditorMarkers();updateEditorPointDisplay();
   };
+
   document.onmouseup=()=>{editorDragging=null;};
+
+  // Mouse wheel zoom
+  tl.onwheel=e=>{
+    e.preventDefault();
+    const rect=tl.getBoundingClientRect();
+    const rawPct=(e.clientX-rect.left)/rect.width;
+    const audioPctAtCursor=rawToAudio(rawPct);
+    const zoomFactor=e.deltaY<0?1.4:0.75;
+    const newZoom=Math.max(1,Math.min(20,editorZoom*zoomFactor));
+    // Keep cursor position stable while zooming
+    editorZoomOffset=Math.max(0,Math.min(1-1/newZoom,audioPctAtCursor-rawPct*(1/newZoom)));
+    editorZoom=newZoom;
+    updateEditorMarkers();buildTicks();drawWaveform(carts[editorIdx].file);
+  };
 }
 
 function editorPlay(){
@@ -1708,8 +1754,9 @@ function editorPlay(){
   function tick(){
     if(!editorAudio||!editorPlaying)return;
     const pos=editorAudio.currentTime;
-    const pct=editorDuration>0?pos/editorDuration:0;
-    const ph=document.getElementById("ed-playhead");if(ph)ph.style.left=(pct*100)+"%";
+    const audioPct=editorDuration>0?pos/editorDuration:0;
+    const displayPct=Math.max(0,Math.min(1,(audioPct-editorZoomOffset)*editorZoom));
+    const ph=document.getElementById("ed-playhead");if(ph)ph.style.left=(displayPct*100)+"%";
     const posEl=document.getElementById("ed-pos");
     if(posEl)posEl.textContent=fmtTime(pos);
     // Stop at out point
