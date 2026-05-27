@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>A1 Mojo Manager v2.1.12</title>
+<title>A1 Mojo Manager v2.1.13</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Share+Tech+Mono&family=Rajdhani:wght@600;700&display=swap');
 :root {
@@ -355,7 +355,7 @@ body{background:var(--black);font-family:"Share Tech Mono",monospace;color:var(-
   <div id="startup-modal">
     <img id="startup-logo" src="https://bigdaddysikmix.github.io/mojo-manager/A1-logo.png" onerror="this.style.display='none'">
     <div id="startup-title">A1 MOJO MANAGER</div>
-    <div id="startup-sub">AREA MANAGER CONSOLE • v2.1.12</div>
+    <div id="startup-sub">AREA MANAGER CONSOLE • v2.1.13</div>
     <div id="startup-time">--:--:--</div>
     <div id="startup-date">LOADING...</div>
     <div id="startup-msg">
@@ -379,7 +379,7 @@ body{background:var(--black);font-family:"Share Tech Mono",monospace;color:var(-
   <div id="clock-wrap">
     <div id="clock">--:--:--</div>
     <div id="clock-date">...</div>
-    <div id="ver-lbl">v2.1.12</div>
+    <div id="ver-lbl">v2.1.13</div>
   </div>
 </div>
 
@@ -527,7 +527,7 @@ body{background:var(--black);font-family:"Share Tech Mono",monospace;color:var(-
 
 <!-- STATUS BAR -->
 <div id="statusbar">
-  <div id="sl">A1 MOJO MANAGER v2.1.12 • DABBING PUG PRODUCTIONS</div>
+  <div id="sl">A1 MOJO MANAGER v2.1.13 • DABBING PUG PRODUCTIONS</div>
   <div id="sr">A1 GARAGE DOOR SERVICE</div>
 </div>
 
@@ -1179,17 +1179,16 @@ function playSeqStep(step){
     if(outWatcher)clearInterval(outWatcher);
     if(!seqActive)return;
     if(reason==="cue"){
-      // 1-second fast fade then fire next
-      const startVol=a.volume;const steps=20;const stepTime=50;let s2=0;
+      // Fire next clip IMMEDIATELY, fade current out underneath
+      const fadeAudio=a;
+      const startVol=fadeAudio.volume;const steps=20;const stepTime=50;let s2=0;
       const fadeOut=setInterval(()=>{
-        s2++;a.volume=Math.max(0,startVol*(1-s2/steps));
-        if(s2>=steps){
-          clearInterval(fadeOut);
-          if(c.audio){c.audio.pause();c.audio=null;}
-          c.playing=false;updateCartUI(idx);
-          setTimeout(()=>playSeqStep(step+1),50);
-        }
+        s2++;fadeAudio.volume=Math.max(0,startVol*(1-s2/steps));
+        if(s2>=steps){clearInterval(fadeOut);fadeAudio.pause();}
       },stepTime);
+      // Next clip starts RIGHT NOW, not after fade
+      c.playing=false;updateCartUI(idx);
+      playSeqStep(step+1);
     } else {
       if(c.audio){c.audio.pause();c.audio=null;}
       c.playing=false;updateCartUI(idx);
