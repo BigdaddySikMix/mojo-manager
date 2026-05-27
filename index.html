@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>A1 Mojo Manager v2.1.7</title>
+<title>A1 Mojo Manager v2.1.8</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Share+Tech+Mono&family=Rajdhani:wght@600;700&display=swap');
 :root {
@@ -355,7 +355,7 @@ body{background:var(--black);font-family:"Share Tech Mono",monospace;color:var(-
   <div id="startup-modal">
     <img id="startup-logo" src="https://bigdaddysikmix.github.io/mojo-manager/A1-logo.png" onerror="this.style.display='none'">
     <div id="startup-title">A1 MOJO MANAGER</div>
-    <div id="startup-sub">AREA MANAGER CONSOLE • v2.1.7</div>
+    <div id="startup-sub">AREA MANAGER CONSOLE • v2.1.8</div>
     <div id="startup-time">--:--:--</div>
     <div id="startup-date">LOADING...</div>
     <div id="startup-msg">
@@ -379,7 +379,7 @@ body{background:var(--black);font-family:"Share Tech Mono",monospace;color:var(-
   <div id="clock-wrap">
     <div id="clock">--:--:--</div>
     <div id="clock-date">...</div>
-    <div id="ver-lbl">v2.1.7</div>
+    <div id="ver-lbl">v2.1.8</div>
   </div>
 </div>
 
@@ -450,15 +450,90 @@ body{background:var(--black);font-family:"Share Tech Mono",monospace;color:var(-
   <div id="slot-ctx-list"></div>
 </div>
 
+<!-- TRIM / CUE EDITOR MODAL -->
+<div id="editor-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.88);z-index:9500;align-items:center;justify-content:center;">
+  <div id="editor-modal" style="background:#111;border:2px solid #cc0000;border-radius:6px;padding:16px;width:680px;max-width:96vw;font-family:'Share Tech Mono',monospace;color:#ddd;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+      <div>
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:13px;letter-spacing:3px;color:#dd7777;">✂ TRIM / CUE EDITOR</div>
+        <div id="editor-trackname" style="font-family:'Rajdhani',sans-serif;font-weight:700;font-size:16px;color:#fff;"></div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <div id="editor-mode-lbl" style="font-size:9px;color:#888;letter-spacing:1px;text-align:right;"></div>
+        <div onclick="closeEditor()" style="cursor:pointer;font-family:'Bebas Neue',sans-serif;font-size:13px;color:#ff4444;border:1px solid #ff4444;border-radius:2px;padding:2px 10px;letter-spacing:1px;">✕ CLOSE</div>
+      </div>
+    </div>
+
+    <!-- TIMELINE -->
+    <div style="position:relative;margin-bottom:6px;padding-top:20px;">
+      <div id="ed-lbl-in" style="position:absolute;top:2px;font-size:9px;color:#00cc44;transform:translateX(-50%);white-space:nowrap;">IN</div>
+      <div id="ed-lbl-cue" style="position:absolute;top:2px;font-size:9px;color:#ffaa00;transform:translateX(-50%);white-space:nowrap;display:none;">◆ CUE</div>
+      <div id="ed-lbl-out" style="position:absolute;top:2px;font-size:9px;color:#cc4400;transform:translateX(-50%);white-space:nowrap;">OUT</div>
+      <div id="ed-timeline" style="width:100%;height:56px;background:#080000;border:1px solid #2a0000;border-radius:2px;position:relative;cursor:crosshair;overflow:hidden;">
+        <canvas id="ed-waveform" style="position:absolute;top:0;left:0;width:100%;height:100%;"></canvas>
+        <div id="ed-playhead" style="position:absolute;top:0;bottom:0;width:1px;background:#fff;opacity:0.5;left:0%;pointer-events:none;"></div>
+        <div id="ed-in-marker" style="position:absolute;top:0;bottom:0;width:2px;background:#00cc44;left:0%;cursor:ew-resize;"></div>
+        <div id="ed-cue-marker" style="position:absolute;top:0;bottom:0;width:2px;background:#ffaa00;left:50%;cursor:ew-resize;display:none;"></div>
+        <div id="ed-out-marker" style="position:absolute;top:0;bottom:0;width:2px;background:#cc4400;left:100%;cursor:ew-resize;"></div>
+        <div id="ed-in-flag" style="position:absolute;top:0;left:0%;width:6px;height:6px;background:#00cc44;pointer-events:none;"></div>
+        <div id="ed-cue-flag" style="position:absolute;top:0;left:50%;width:6px;height:6px;background:#ffaa00;pointer-events:none;display:none;"></div>
+        <div id="ed-out-flag" style="position:absolute;top:0;left:100%;margin-left:-6px;width:6px;height:6px;background:#cc4400;pointer-events:none;"></div>
+      </div>
+    </div>
+
+    <!-- TIME TICKS -->
+    <div id="ed-ticks" style="display:flex;justify-content:space-between;font-size:8px;color:#444;margin-bottom:8px;padding:0 1px;"></div>
+
+    <!-- TRANSPORT -->
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+      <div id="ed-play-btn" onclick="editorPlay()" style="padding:5px 14px;background:#002200;border:2px solid #00cc44;border-radius:3px;color:#00cc44;font-family:'Bebas Neue',sans-serif;font-size:14px;letter-spacing:2px;cursor:pointer;">▶ PLAY</div>
+      <div onclick="editorStop()" style="padding:5px 14px;background:#180000;border:2px solid #cc3333;border-radius:3px;color:#cc3333;font-family:'Bebas Neue',sans-serif;font-size:14px;letter-spacing:2px;cursor:pointer;">■ STOP</div>
+      <div id="ed-pos" style="font-size:14px;color:#fff;background:#0a0a0a;border:1px solid #333;padding:3px 10px;border-radius:2px;min-width:64px;text-align:center;">0:00</div>
+      <div id="ed-duration" style="font-size:10px;color:#555;"></div>
+      <div style="flex:1;"></div>
+      <div onclick="editorSetIn()" style="padding:4px 10px;background:#001800;border:2px solid #00cc44;border-radius:3px;color:#00cc44;font-family:'Bebas Neue',sans-serif;font-size:12px;letter-spacing:1px;cursor:pointer;">[ SET IN</div>
+      <div id="ed-cue-btn" onclick="editorSetCue()" style="padding:4px 10px;background:#1a0e00;border:2px solid #ffaa00;border-radius:3px;color:#ffaa00;font-family:'Bebas Neue',sans-serif;font-size:12px;letter-spacing:1px;cursor:pointer;display:none;">◆ SET CUE</div>
+      <div onclick="editorSetOut()" style="padding:4px 10px;background:#180800;border:2px solid #cc4400;border-radius:3px;color:#cc4400;font-family:'Bebas Neue',sans-serif;font-size:12px;letter-spacing:1px;cursor:pointer;">SET OUT ]</div>
+    </div>
+
+    <!-- POINT DISPLAY -->
+    <div style="display:flex;gap:10px;margin-bottom:10px;">
+      <div style="flex:1;background:#0a0a0a;border:1px solid #1a3a1a;border-radius:2px;padding:5px 8px;text-align:center;">
+        <div style="font-size:8px;color:#00cc44;letter-spacing:2px;margin-bottom:2px;">IN POINT</div>
+        <div id="ed-in-val" style="font-size:13px;color:#00cc44;">0:00.0</div>
+      </div>
+      <div id="ed-cue-display" style="flex:1;background:#0a0a0a;border:1px solid #3a2a00;border-radius:2px;padding:5px 8px;text-align:center;display:none;">
+        <div style="font-size:8px;color:#ffaa00;letter-spacing:2px;margin-bottom:2px;">CUE POINT</div>
+        <div id="ed-cue-val" style="font-size:13px;color:#ffaa00;">--</div>
+      </div>
+      <div style="flex:1;background:#0a0a0a;border:1px solid #3a1a00;border-radius:2px;padding:5px 8px;text-align:center;">
+        <div style="font-size:8px;color:#cc4400;letter-spacing:2px;margin-bottom:2px;">OUT POINT</div>
+        <div id="ed-out-val" style="font-size:13px;color:#cc4400;">--</div>
+      </div>
+      <div style="flex:1;background:#0a0a0a;border:1px solid #333;border-radius:2px;padding:5px 8px;text-align:center;">
+        <div style="font-size:8px;color:#888;letter-spacing:2px;margin-bottom:2px;">CLIP LENGTH</div>
+        <div id="ed-clip-len" style="font-size:13px;color:#aaa;">--</div>
+      </div>
+    </div>
+
+    <!-- LEGEND & ACTIONS -->
+    <div style="display:flex;align-items:center;gap:12px;">
+      <div style="font-size:8px;color:#555;letter-spacing:1px;flex:1;">drag markers on timeline • play to find your points • click SET to stamp</div>
+      <div onclick="editorClearPoints()" style="padding:4px 10px;background:#0a0a0a;border:1px solid #555;border-radius:2px;color:#888;font-family:'Bebas Neue',sans-serif;font-size:11px;letter-spacing:1px;cursor:pointer;">CLEAR ALL</div>
+      <div id="ed-save-btn" onclick="editorSave()" style="padding:5px 16px;background:#002200;border:2px solid #00cc44;border-radius:3px;color:#00cc44;font-family:'Bebas Neue',sans-serif;font-size:14px;letter-spacing:2px;cursor:pointer;">💾 SAVE</div>
+    </div>
+  </div>
+</div>
+
 <!-- STATUS BAR -->
 <div id="statusbar">
-  <div id="sl">A1 MOJO MANAGER v2.1.7 • DABBING PUG PRODUCTIONS</div>
+  <div id="sl">A1 MOJO MANAGER v2.1.8 • DABBING PUG PRODUCTIONS</div>
   <div id="sr">A1 GARAGE DOOR SERVICE</div>
 </div>
 
 <script>
 const MUSIC_SLOTS=5,SFX_PER_PAGE=12,SFX_PAGES=3,SFX_TOTAL=SFX_PER_PAGE*SFX_PAGES,TOTAL=MUSIC_SLOTS+SFX_TOTAL,FADE_RESET_VOL=0.9;
-let carts=Array.from({length:TOTAL},(_,i)=>({idx:i,name:null,file:null,fileHandle:null,audio:null,playing:false,duration:0,startTime:0,volume:1.0,fadeSpeed:2000,fadeInterval:null,auto:false,_queuePos:0,_seeking:false}));
+let carts=Array.from({length:TOTAL},(_,i)=>({idx:i,name:null,file:null,fileHandle:null,audio:null,playing:false,duration:0,startTime:0,volume:1.0,fadeSpeed:2000,fadeInterval:null,auto:false,_queuePos:0,_seeking:false,inPoint:0,outPoint:0,cuePoint:0}));
 let sfxPage=0,dirHandle=null,masterDuck=1.0;
 
 // ══ IDB ══
@@ -549,7 +624,7 @@ async function restoreState(){
   const l=localStorage.getItem("a1mojo2_meetlink");if(l)document.getElementById("meet-link").value=l;
   const v=localStorage.getItem("a1mojo2_vidurl");if(v)document.getElementById("vid-url").value=v;
   const saved=getSavedCarts();
-  if(saved){saved.forEach((d,i)=>{if(d&&i<TOTAL){carts[i].name=d.name||null;carts[i].auto=d.auto||false;carts[i].volume=d.volume!=null?d.volume:1.0;carts[i].fadeSpeed=d.fadeSpeed||2000;carts[i]._cleared=d.cleared||false;}});}
+  if(saved){saved.forEach((d,i)=>{if(d&&i<TOTAL){carts[i].name=d.name||null;carts[i].auto=d.auto||false;carts[i].volume=d.volume!=null?d.volume:1.0;carts[i].fadeSpeed=d.fadeSpeed||2000;carts[i]._cleared=d.cleared||false;carts[i].inPoint=d.inPoint||0;carts[i].outPoint=d.outPoint||0;carts[i].cuePoint=d.cuePoint||0;}});}
   try{
     const h=await getIDB("folder");
     if(h){
@@ -643,7 +718,7 @@ function updateDurationDisplay(idx){
 function saveCarts(){
   try{
     localStorage.setItem("a1mojo2_carts",JSON.stringify(carts.map(c=>{
-      if(c.name)return{name:c.name,auto:c.auto,volume:c.volume,fadeSpeed:c.fadeSpeed};
+      if(c.name)return{name:c.name,auto:c.auto,volume:c.volume,fadeSpeed:c.fadeSpeed,inPoint:c.inPoint||0,outPoint:c.outPoint||0,cuePoint:c.cuePoint||0};
       if(c._cleared)return{cleared:true};
       return null;
     })));
@@ -795,7 +870,7 @@ function renderMusicChannels(){
     row2.append(fdrWrap,spdGroup,fadeBtn,pnGroup);
     wrap.append(row1,row2);
     setupDragDrop(wrap,i);
-    wrap.addEventListener("contextmenu",e=>showCtxMenu(e,i));
+    wrap.addEventListener("contextmenu",e=>{ e.preventDefault(); if(carts[i].file) openEditor(i,false); else showCtxMenu(e,i); });
     container.appendChild(wrap);
   }
 }
@@ -829,6 +904,13 @@ function renderSFX(){
     else if(loaded&&c.duration>0){cd.className="sfx-cd idle";cd.textContent=fmtTime(c.duration);}
     else{cd.className="sfx-cd";cd.textContent="";}
     btn.append(slotNum,dot,nm,cd);
+    // Show trim/cue indicator if points are set
+    if(loaded&&(c.inPoint>0||c.outPoint>0||c.cuePoint>0)){
+      const trimDot=document.createElement("div");
+      trimDot.style.cssText="position:absolute;top:2px;left:50%;transform:translateX(-50%);font-size:7px;color:"+(c.cuePoint>0?"#ffaa00":"#00cc44")+";letter-spacing:0;font-family:'Bebas Neue',sans-serif;";
+      trimDot.textContent=c.cuePoint>0?"◆":"✂";
+      btn.appendChild(trimDot);
+    }
     btn.onclick=()=>{if(loaded)fireCart(idx);else pickFile(idx);};
     slotNum.style.cursor="grab";slotNum.addEventListener("mousedown",()=>btn.draggable=true);slotNum.addEventListener("mouseup",()=>btn.draggable=false);
     if(loaded){
@@ -837,7 +919,7 @@ function renderSFX(){
       btn.appendChild(clrBtn);
     }
     setupDragDrop(btn,idx);
-    btn.addEventListener("contextmenu",e=>showCtxMenu(e,idx));
+    btn.addEventListener("contextmenu",e=>{ e.preventDefault(); if(c.file) openEditor(idx,false); else showCtxMenu(e,idx); });
     rack.appendChild(btn);
   }
 }
@@ -851,25 +933,82 @@ function fireCart(idx){
   const a=new Audio(c.file);
   a.volume=(idx<MUSIC_SLOTS)?c.volume*masterDuck:1.0;
   c.audio=a;c.playing=true;updateCartUI(idx);
-  const startPos=c._queuePos||0;
+
+  const startPos=c._queuePos>0?c._queuePos:(c.inPoint||0);
+  const endPos=c.outPoint>0?c.outPoint:0;
+  const cuePos=c.cuePoint>0?c.cuePoint:0;
+
   if(startPos>0){a.addEventListener("loadedmetadata",()=>{a.currentTime=startPos;},{once:true});}
   c._queuePos=0;
+
   if(idx<MUSIC_SLOTS)startCountdown(idx,startPos);
   else if(c.duration>0)startSFXCountdown(idx);
+
+  // Cue point watcher — fires when playback reaches cuePoint
+  let cueWatchInterval=null;
+  if(cuePos>0){
+    cueWatchInterval=setInterval(()=>{
+      if(!c.audio||!c.playing)return clearInterval(cueWatchInterval);
+      if(c.audio.currentTime>=cuePos){
+        clearInterval(cueWatchInterval);
+        // Fast 1-second fade then fire next seq slot
+        const startVol=a.volume;const steps=20;const stepTime=1000/steps;let step=0;
+        const fadeOut=setInterval(()=>{
+          step++;a.volume=Math.max(0,startVol*(1-step/steps));
+          if(step>=steps){
+            clearInterval(fadeOut);
+            if(c.audio){c.audio.pause();c.audio=null;}
+            c.playing=false;updateCartUI(idx);
+            if(idx<MUSIC_SLOTS){resetSeekBar(idx);const cdEl=document.getElementById("mchcd-"+idx);if(cdEl){cdEl.textContent=c.duration>0?fmtTime(c.duration):"--:--";cdEl.className=c.duration>0?"mch-cd loaded-idle":"mch-cd";}}
+            // Fire next in sequencer if this clip is in the active sequence
+            advanceSeqAfterCue(idx);
+          }
+        },stepTime);
+      }
+    },50);
+  }
+
+  // Out point watcher
+  let outWatchInterval=null;
+  if(endPos>0){
+    outWatchInterval=setInterval(()=>{
+      if(!c.audio||!c.playing)return clearInterval(outWatchInterval);
+      if(c.audio.currentTime>=endPos){
+        clearInterval(outWatchInterval);
+        if(cueWatchInterval)clearInterval(cueWatchInterval);
+        if(c.audio){c.audio.pause();c.audio=null;}
+        c.playing=false;updateCartUI(idx);
+        handleCartEnded(idx,c);
+      }
+    },50);
+  }
+
   a.addEventListener("ended",()=>{
+    if(cueWatchInterval)clearInterval(cueWatchInterval);
+    if(outWatchInterval)clearInterval(outWatchInterval);
     c.playing=false;c.audio=null;updateCartUI(idx);
-    if(idx<MUSIC_SLOTS){
-      const cdEl=document.getElementById("mchcd-"+idx);
-      if(cdEl){if(c.duration>0){cdEl.textContent=fmtTime(c.duration);cdEl.className="mch-cd loaded-idle";}else{cdEl.textContent="--:--";cdEl.className="mch-cd";}}
-      resetSeekBar(idx);
-      if(c.auto){const next=(idx+1)%MUSIC_SLOTS;if(carts[next].file)setTimeout(()=>fireCart(next),200);}
-    } else {
-      // restore pre-roll duration on SFX after play
-      const cdEl=document.getElementById("sfxcd-"+idx);
-      if(cdEl){if(c.duration>0){cdEl.textContent=fmtTime(c.duration);cdEl.className="sfx-cd idle";}else{cdEl.textContent="";cdEl.className="sfx-cd";}}
-    }
+    handleCartEnded(idx,c);
   });
   a.play().catch(()=>{});
+}
+
+function handleCartEnded(idx,c){
+  if(idx<MUSIC_SLOTS){
+    const cdEl=document.getElementById("mchcd-"+idx);
+    if(cdEl){if(c.duration>0){cdEl.textContent=fmtTime(c.duration);cdEl.className="mch-cd loaded-idle";}else{cdEl.textContent="--:--";cdEl.className="mch-cd";}}
+    resetSeekBar(idx);
+    if(c.auto){const next=(idx+1)%MUSIC_SLOTS;if(carts[next].file)setTimeout(()=>fireCart(next),200);}
+  } else {
+    const cdEl=document.getElementById("sfxcd-"+idx);
+    if(cdEl){if(c.duration>0){cdEl.textContent=fmtTime(c.duration);cdEl.className="sfx-cd idle";}else{cdEl.textContent="";cdEl.className="sfx-cd";}}
+  }
+}
+
+function advanceSeqAfterCue(idx){
+  // Find this cart in the active sequence and advance
+  if(!seqActive)return;
+  const seqIdx=seqQueue.indexOf(idx);
+  if(seqIdx>=0)setTimeout(()=>playSeqStep(seqIdx+1),100);
 }
 
 function stopCart(idx){
@@ -1007,6 +1146,7 @@ function renderSeq(){
     slot.ondragover=e=>{if(e.dataTransfer.types.includes("text/cart-idx")){e.preventDefault();slot.classList.add("drag-over");}};
     slot.ondragleave=()=>slot.classList.remove("drag-over");
     slot.ondrop=e=>{e.preventDefault();slot.classList.remove("drag-over");const fromStr=e.dataTransfer.getData("text/cart-idx");if(fromStr==="")return;const fi=parseInt(fromStr);if(isNaN(fi)||fi<MUSIC_SLOTS)return;seqSlots[i]=fi;renderSeq();};
+    slot.oncontextmenu=e=>{e.preventDefault();if(cidx!==null&&carts[cidx]&&carts[cidx].file)openEditor(cidx,true);};
   }
 }
 function fireSequence(){if(seqActive){stopSequence();return;}seqQueue=seqSlots.filter(idx=>idx!==null&&idx<TOTAL&&carts[idx]&&carts[idx].file);if(seqQueue.length===0)return;seqActive=true;document.getElementById("seq-fire").classList.add("firing");document.getElementById("seq-fire").textContent="■ STOP SEQ";playSeqStep(0);}
@@ -1197,7 +1337,230 @@ function showRotatorCtx(e){
   setTimeout(()=>document.addEventListener("click",()=>menu.remove(),{once:true}),10);
 }
 
-// ══ INIT ══
+// ══ TRIM / CUE EDITOR ══
+let editorIdx=null;
+let editorCueMode=false;
+let editorAudio=null;
+let editorPlaying=false;
+let editorDuration=0;
+let editorInPct=0;
+let editorOutPct=1;
+let editorCuePct=0.5;
+let editorHasCue=false;
+let editorAnimFrame=null;
+let editorDragging=null; // 'in','out','cue'
+
+function openEditor(idx,cueMode){
+  const c=carts[idx];
+  if(!c.file)return;
+  editorIdx=idx;
+  editorCueMode=cueMode;
+  editorPlaying=false;
+  editorDuration=c.duration||0;
+
+  // Restore saved points or defaults
+  editorInPct=c.inPoint>0&&editorDuration>0?c.inPoint/editorDuration:0;
+  editorOutPct=c.outPoint>0&&editorDuration>0?c.outPoint/editorDuration:1;
+  editorCuePct=c.cuePoint>0&&editorDuration>0?c.cuePoint/editorDuration:0.5;
+  editorHasCue=c.cuePoint>0;
+
+  document.getElementById("editor-trackname").textContent=c.name||"";
+  document.getElementById("editor-mode-lbl").textContent=cueMode?"SEQ CUE MODE — set cue point to chain next slot":"TRIM MODE — set IN/OUT to clip silence";
+
+  // Show/hide cue elements
+  const cueEl=document.getElementById("ed-cue-marker");
+  const cueFlag=document.getElementById("ed-cue-flag");
+  const cueLbl=document.getElementById("ed-lbl-cue");
+  const cueBtn=document.getElementById("ed-cue-btn");
+  const cueDisplay=document.getElementById("ed-cue-display");
+  [cueEl,cueFlag,cueLbl,cueBtn,cueDisplay].forEach(el=>{if(el)el.style.display=cueMode?(el.id==="ed-cue-marker"||el.id==="ed-cue-flag"?editorHasCue?"block":"none":"flex"):"none";});
+
+  document.getElementById("editor-overlay").style.display="flex";
+  updateEditorMarkers();
+  updateEditorPointDisplay();
+  drawWaveform(c.file);
+  setupEditorDrag();
+  buildTicks();
+}
+
+function closeEditor(){
+  editorStop();
+  document.getElementById("editor-overlay").style.display="none";
+  editorIdx=null;
+}
+
+function buildTicks(){
+  const el=document.getElementById("ed-ticks");el.innerHTML="";
+  if(!editorDuration)return;
+  const count=8;
+  for(let i=0;i<=count;i++){
+    const t=document.createElement("span");
+    t.textContent=fmtTime((i/count)*editorDuration);
+    el.appendChild(t);
+  }
+}
+
+function drawWaveform(src){
+  const canvas=document.getElementById("ed-waveform");
+  if(!canvas)return;
+  const ctx=canvas.getContext("2d");
+  canvas.width=canvas.offsetWidth||640;
+  canvas.height=canvas.offsetHeight||56;
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+
+  // Draw a placeholder line while loading
+  ctx.strokeStyle="#330000";ctx.lineWidth=1;
+  ctx.beginPath();ctx.moveTo(0,canvas.height/2);ctx.lineTo(canvas.width,canvas.height/2);ctx.stroke();
+
+  // Decode audio for real waveform
+  fetch(src).then(r=>r.arrayBuffer()).then(buf=>{
+    const ac=new (window.AudioContext||window.webkitAudioContext)();
+    return ac.decodeAudioData(buf);
+  }).then(decoded=>{
+    const data=decoded.getChannelData(0);
+    const W=canvas.width,H=canvas.height;
+    const step=Math.ceil(data.length/W);
+    ctx.clearRect(0,0,W,H);
+    ctx.strokeStyle="#882222";ctx.lineWidth=1;
+    ctx.beginPath();
+    for(let x=0;x<W;x++){
+      let max=0;
+      for(let j=0;j<step;j++){const v=Math.abs(data[x*step+j]||0);if(v>max)max=v;}
+      const h=max*(H/2)*0.9;
+      ctx.moveTo(x,H/2-h);ctx.lineTo(x,H/2+h);
+    }
+    ctx.stroke();
+  }).catch(()=>{});
+}
+
+function updateEditorMarkers(){
+  const setM=(id,pct)=>{const el=document.getElementById(id);if(el)el.style.left=(pct*100)+"%";};
+  const setF=(id,pct,offset=0)=>{const el=document.getElementById(id);if(el)el.style.left="calc("+( pct*100)+"% + "+offset+"px)";};
+  const setL=(id,pct)=>{const el=document.getElementById(id);if(el)el.style.left=(pct*100)+"%";};
+  setM("ed-in-marker",editorInPct);setF("ed-in-flag",editorInPct);setL("ed-lbl-in",editorInPct);
+  setM("ed-out-marker",editorOutPct);setF("ed-out-flag",editorOutPct,-6);setL("ed-lbl-out",editorOutPct);
+  if(editorHasCue){
+    setM("ed-cue-marker",editorCuePct);setF("ed-cue-flag",editorCuePct);setL("ed-lbl-cue",editorCuePct);
+  }
+}
+
+function updateEditorPointDisplay(){
+  const fmt1=(s)=>String(Math.floor(s/60)).padStart(2,"0")+":"+String(Math.floor(s%60)).padStart(2,"0")+"."+String(Math.floor((s%1)*10));
+  document.getElementById("ed-in-val").textContent=fmt1(editorInPct*editorDuration);
+  document.getElementById("ed-out-val").textContent=editorOutPct<1?fmt1(editorOutPct*editorDuration):"(end)";
+  if(editorHasCue)document.getElementById("ed-cue-val").textContent=fmt1(editorCuePct*editorDuration);
+  const clipLen=editorDuration>0?(editorOutPct-editorInPct)*editorDuration:0;
+  document.getElementById("ed-clip-len").textContent=clipLen>0?fmtTime(clipLen):"--";
+  document.getElementById("ed-duration").textContent=editorDuration>0?"/ "+fmtTime(editorDuration):"";
+}
+
+function setupEditorDrag(){
+  const tl=document.getElementById("ed-timeline");
+  if(!tl)return;
+  tl.onmousedown=e=>{
+    const rect=tl.getBoundingClientRect();
+    const pct=(e.clientX-rect.left)/rect.width;
+    // Determine which marker is closest
+    const dIn=Math.abs(pct-editorInPct);
+    const dOut=Math.abs(pct-editorOutPct);
+    const dCue=editorHasCue?Math.abs(pct-editorCuePct):999;
+    const minD=Math.min(dIn,dOut,dCue);
+    if(minD<0.05){
+      if(minD===dIn)editorDragging="in";
+      else if(minD===dOut)editorDragging="out";
+      else editorDragging="cue";
+    } else {
+      // Click to seek playback position
+      if(editorAudio)editorAudio.currentTime=pct*editorDuration;
+    }
+    e.preventDefault();
+  };
+  document.onmousemove=e=>{
+    if(!editorDragging)return;
+    const tl2=document.getElementById("ed-timeline");if(!tl2)return;
+    const rect=tl2.getBoundingClientRect();
+    let pct=Math.max(0,Math.min(1,(e.clientX-rect.left)/rect.width));
+    if(editorDragging==="in"){editorInPct=Math.min(pct,editorOutPct-0.01);}
+    else if(editorDragging==="out"){editorOutPct=Math.max(pct,editorInPct+0.01);}
+    else if(editorDragging==="cue"){editorCuePct=Math.max(editorInPct,Math.min(editorOutPct,pct));}
+    updateEditorMarkers();updateEditorPointDisplay();
+  };
+  document.onmouseup=()=>{editorDragging=null;};
+}
+
+function editorPlay(){
+  if(editorPlaying)return;
+  if(!editorIdx===null)return;
+  const c=carts[editorIdx];if(!c.file)return;
+  editorAudio=new Audio(c.file);
+  editorAudio.currentTime=editorInPct*editorDuration;
+  editorPlaying=true;
+  document.getElementById("ed-play-btn").style.background="#00cc44";
+  document.getElementById("ed-play-btn").style.color="#000";
+  editorAudio.play().catch(()=>{});
+  function tick(){
+    if(!editorAudio||!editorPlaying)return;
+    const pos=editorAudio.currentTime;
+    const pct=editorDuration>0?pos/editorDuration:0;
+    const ph=document.getElementById("ed-playhead");if(ph)ph.style.left=(pct*100)+"%";
+    const posEl=document.getElementById("ed-pos");
+    if(posEl)posEl.textContent=fmtTime(pos);
+    // Stop at out point
+    if(editorOutPct<1&&pos>=editorOutPct*editorDuration){editorStop();return;}
+    editorAnimFrame=requestAnimationFrame(tick);
+  }
+  editorAnimFrame=requestAnimationFrame(tick);
+  editorAudio.addEventListener("ended",editorStop);
+}
+
+function editorStop(){
+  editorPlaying=false;
+  if(editorAnimFrame){cancelAnimationFrame(editorAnimFrame);editorAnimFrame=null;}
+  if(editorAudio){editorAudio.pause();editorAudio=null;}
+  const btn=document.getElementById("ed-play-btn");
+  if(btn){btn.style.background="#002200";btn.style.color="#00cc44";}
+}
+
+function editorSetIn(){
+  const pos=editorAudio?editorAudio.currentTime:editorInPct*editorDuration;
+  editorInPct=editorDuration>0?pos/editorDuration:0;
+  updateEditorMarkers();updateEditorPointDisplay();
+}
+function editorSetOut(){
+  const pos=editorAudio?editorAudio.currentTime:editorOutPct*editorDuration;
+  editorOutPct=editorDuration>0?pos/editorDuration:1;
+  updateEditorMarkers();updateEditorPointDisplay();
+}
+function editorSetCue(){
+  const pos=editorAudio?editorAudio.currentTime:editorCuePct*editorDuration;
+  editorCuePct=editorDuration>0?pos/editorDuration:0.5;
+  editorHasCue=true;
+  // Show cue elements
+  ["ed-cue-marker","ed-cue-flag","ed-lbl-cue","ed-cue-btn","ed-cue-display"].forEach(id=>{
+    const el=document.getElementById(id);if(el)el.style.display=id==="ed-cue-marker"||id==="ed-cue-flag"?"block":"flex";
+  });
+  updateEditorMarkers();updateEditorPointDisplay();
+}
+function editorClearPoints(){
+  editorInPct=0;editorOutPct=1;editorCuePct=0.5;editorHasCue=false;
+  ["ed-cue-marker","ed-cue-flag","ed-lbl-cue"].forEach(id=>{const el=document.getElementById(id);if(el)el.style.display="none";});
+  updateEditorMarkers();updateEditorPointDisplay();
+}
+
+function editorSave(){
+  if(editorIdx===null)return;
+  const c=carts[editorIdx];
+  c.inPoint=editorInPct*editorDuration;
+  c.outPoint=editorOutPct<0.999?editorOutPct*editorDuration:0;
+  c.cuePoint=editorHasCue?editorCuePct*editorDuration:0;
+  saveCarts();
+  // Flash save button green
+  const btn=document.getElementById("ed-save-btn");
+  if(btn){const orig=btn.textContent;btn.textContent="✅ SAVED";btn.style.background="#00cc44";btn.style.color="#000";
+    setTimeout(()=>{btn.textContent=orig;btn.style.background="#002200";btn.style.color="#00cc44";},1200);}
+  // Update slot display to show cue point indicator
+  if(editorIdx<MUSIC_SLOTS)renderMusicChannels();else renderSFX();
+}
 async function init(){
   await restoreState();
   renderMusicChannels();renderSFX();renderSeq();setupPageTabDrop();updateAMPM();
