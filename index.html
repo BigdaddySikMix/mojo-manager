@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>A1 Mojo Manager v2.1.6</title>
+<title>A1 Mojo Manager v2.1.7</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Share+Tech+Mono&family=Rajdhani:wght@600;700&display=swap');
 :root {
@@ -109,15 +109,15 @@ body{background:var(--black);font-family:"Share Tech Mono",monospace;color:var(-
 /* ══ MUSIC CHANNELS ══ */
 #music-section{flex-shrink:0;}
 #music-lbl{font-family:"Bebas Neue",sans-serif;font-size:9px;letter-spacing:4px;color:var(--lbl);margin-bottom:3px;}
-#music-channels{display:flex;flex-direction:column;gap:3px;}
+#music-channels{display:flex;flex-direction:column;gap:2px;}
 
 .mch{background:#180000;border:1px solid #4a0000;border-radius:3px;
   display:flex;flex-direction:column;transition:border-color 0.15s,background 0.15s;}
 .mch.loaded{border-color:#7a0000;}
 .mch.playing{border-color:var(--green);background:#081800;}
 .mch.drag-over{border-color:var(--orange)!important;background:#150a00;}
-.mch-row1{display:flex;align-items:center;gap:5px;padding:4px 8px 2px 4px;}
-.mch-row2{display:flex;align-items:center;gap:6px;padding:2px 8px 4px 26px;}
+.mch-row1{display:flex;align-items:center;gap:5px;padding:3px 8px 1px 4px;}
+.mch-row2{display:flex;align-items:center;gap:6px;padding:1px 8px 3px 26px;}
 
 .mch-handle{width:16px;height:34px;display:flex;align-items:center;justify-content:center;
   color:#ffffff;font-size:13px;cursor:grab;flex-shrink:0;user-select:none;
@@ -238,7 +238,23 @@ body{background:var(--black);font-family:"Share Tech Mono",monospace;color:var(-
 /* pre-roll duration on SFX — bottom right, dimmer than running */
 .sfx-cd.idle{color:#446644;font-size:11px;}
 
-/* SFX BUTTON */
+/* ══ ROTATOR SLOT ══ */
+.sfx-btn.rotator{
+  border:2px dashed #cc0000;
+  background:linear-gradient(135deg,#0d0000 25%,#000 25%,#000 50%,#0d0000 50%,#0d0000 75%,#000 75%,#000);
+  background-size:8px 8px;
+  animation:rotator-dash 0.4s linear infinite;
+}
+@keyframes rotator-dash{to{background-position:8px 0;}}
+.sfx-btn.rotator.loaded{border-color:#cc0000;}
+.sfx-btn.rotator.playing{border-color:#00ff55;background:linear-gradient(135deg,#081800 25%,#000 25%,#000 50%,#081800 50%,#081800 75%,#000 75%,#000);background-size:8px 8px;}
+.rotator-badge{position:absolute;top:2px;left:50%;transform:translateX(-50%);
+  font-family:"Bebas Neue",sans-serif;font-size:7px;letter-spacing:1px;
+  color:#ff4444;background:#0d0000;border:1px solid #cc0000;border-radius:2px;padding:0 4px;white-space:nowrap;}
+.rotator-next{position:absolute;bottom:18px;left:0;right:0;text-align:center;
+  font-size:7px;color:#884444;font-family:"Share Tech Mono",monospace;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding:0 4px;}
+.rotator-count{position:absolute;top:2px;right:3px;font-size:7px;color:#663333;font-family:"Share Tech Mono",monospace;}
 .sfx-btn{background:#180000;border:1px solid #888888;border-radius:3px;
   min-height:58px;display:flex;flex-direction:column;align-items:center;justify-content:center;
   gap:2px;padding:4px 3px 22px 3px;cursor:pointer;transition:border-color 0.1s,background 0.1s;position:relative;}
@@ -339,7 +355,7 @@ body{background:var(--black);font-family:"Share Tech Mono",monospace;color:var(-
   <div id="startup-modal">
     <img id="startup-logo" src="https://bigdaddysikmix.github.io/mojo-manager/A1-logo.png" onerror="this.style.display='none'">
     <div id="startup-title">A1 MOJO MANAGER</div>
-    <div id="startup-sub">AREA MANAGER CONSOLE • v2.1.6</div>
+    <div id="startup-sub">AREA MANAGER CONSOLE • v2.1.7</div>
     <div id="startup-time">--:--:--</div>
     <div id="startup-date">LOADING...</div>
     <div id="startup-msg">
@@ -363,7 +379,7 @@ body{background:var(--black);font-family:"Share Tech Mono",monospace;color:var(-
   <div id="clock-wrap">
     <div id="clock">--:--:--</div>
     <div id="clock-date">...</div>
-    <div id="ver-lbl">MISS RUBY WORLDWIDE • v2.1.6</div>
+    <div id="ver-lbl">v2.1.7</div>
   </div>
 </div>
 
@@ -436,12 +452,12 @@ body{background:var(--black);font-family:"Share Tech Mono",monospace;color:var(-
 
 <!-- STATUS BAR -->
 <div id="statusbar">
-  <div id="sl">A1 MOJO MANAGER v2.1.6 • MISS RUBY WORLDWIDE LLC • BIG DADDY SIK MIX</div>
-  <div id="sr">DABBING PUG PRODUCTIONS</div>
+  <div id="sl">A1 MOJO MANAGER v2.1.7 • DABBING PUG PRODUCTIONS</div>
+  <div id="sr">A1 GARAGE DOOR SERVICE</div>
 </div>
 
 <script>
-const MUSIC_SLOTS=4,SFX_PER_PAGE=12,SFX_PAGES=3,SFX_TOTAL=SFX_PER_PAGE*SFX_PAGES,TOTAL=MUSIC_SLOTS+SFX_TOTAL,FADE_RESET_VOL=0.9;
+const MUSIC_SLOTS=5,SFX_PER_PAGE=12,SFX_PAGES=3,SFX_TOTAL=SFX_PER_PAGE*SFX_PAGES,TOTAL=MUSIC_SLOTS+SFX_TOTAL,FADE_RESET_VOL=0.9;
 let carts=Array.from({length:TOTAL},(_,i)=>({idx:i,name:null,file:null,fileHandle:null,audio:null,playing:false,duration:0,startTime:0,volume:1.0,fadeSpeed:2000,fadeInterval:null,auto:false,_queuePos:0,_seeking:false}));
 let sfxPage=0,dirHandle=null,masterDuck=1.0;
 
@@ -791,7 +807,17 @@ function switchSFXPage(p){sfxPage=p;document.querySelectorAll(".stab").forEach((
 function renderSFX(){
   const rack=document.getElementById("sfx-rack");rack.innerHTML="";
   const base=MUSIC_SLOTS+(sfxPage*SFX_PER_PAGE);
-  for(let i=0;i<SFX_PER_PAGE;i++){
+
+  // Rotator slot — always slot 1 on page 1
+  if(sfxPage===0){
+    const rotBtn=document.createElement("div");rotBtn.id="sfx-rotator";
+    rotBtn.className="sfx-btn rotator";
+    rack.appendChild(rotBtn);
+    renderRotatorSlot();
+  }
+
+  const startI=(sfxPage===0)?1:0; // skip slot 0 on page 1 (rotator took it)
+  for(let i=startI;i<SFX_PER_PAGE;i++){
     const idx=base+i;const c=carts[idx];const loaded=!!c.file;
     const btn=document.createElement("div");btn.className="sfx-btn"+(loaded?" loaded":"  empty-slot")+(c.playing?" playing":"");btn.id="sfx-"+idx;
     const slotNum=document.createElement("div");slotNum.className="sfx-slot-num";slotNum.textContent=String(i+1);
@@ -1057,8 +1083,133 @@ let allFolderFiles=[];      // names without extension
 let allFolderFilesWithExt=[];// full filenames
 let allFolderHandleMap={};  // name-without-ext -> fileHandle
 
+// ══ ROTATOR ══
+const ROTATOR_IDX=MUSIC_SLOTS; // first SFX slot (slot index after music channels)
+let rotatorDirHandle=null;
+let rotatorFiles=[];
+let rotatorPos=0;
+let rotatorAudio=null;
+let rotatorPlaying=false;
+
+async function selectRotatorFolder(){
+  try{
+    const h=await window.showDirectoryPicker({mode:"readwrite"});
+    rotatorDirHandle=h;
+    await saveIDB("rotator_folder",h);
+    await loadRotatorFiles();
+  }catch(e){console.log("Rotator folder:",e.message);}
+}
+
+async function loadRotatorFiles(){
+  if(!rotatorDirHandle)return;
+  const exts=[".mp3",".wav",".flac",".ogg",".m4a",".aac"];
+  rotatorFiles=[];
+  try{
+    for await(const entry of rotatorDirHandle.values()){
+      if(entry.kind==="file"){
+        const ext=entry.name.substring(entry.name.lastIndexOf(".")).toLowerCase();
+        if(exts.includes(ext))rotatorFiles.push(entry);
+      }
+    }
+    rotatorFiles.sort((a,b)=>a.name.localeCompare(b.name));
+    rotatorPos=0;
+    renderRotatorSlot();
+  }catch(e){console.log("Rotator load err:",e.message);}
+}
+
+async function fireRotator(){
+  if(rotatorFiles.length===0){await selectRotatorFolder();return;}
+  if(rotatorPlaying){
+    // stop current
+    if(rotatorAudio){rotatorAudio.pause();rotatorAudio=null;}
+    rotatorPlaying=false;
+    renderRotatorSlot();
+    return;
+  }
+  const fh=rotatorFiles[rotatorPos];
+  try{
+    const file=await fh.getFile();
+    const url=URL.createObjectURL(file);
+    rotatorAudio=new Audio(url);
+    rotatorPlaying=true;
+    renderRotatorSlot();
+    rotatorAudio.addEventListener("ended",()=>{
+      rotatorPlaying=false;
+      rotatorAudio=null;
+      rotatorPos=(rotatorPos+1)%rotatorFiles.length;
+      renderRotatorSlot();
+    });
+    rotatorAudio.play().catch(()=>{});
+  }catch(e){console.log("Rotator play err:",e.message);}
+}
+
+function renderRotatorSlot(){
+  const rack=document.getElementById("sfx-rack");
+  if(!rack||sfxPage!==0)return;
+  const btn=rack.querySelector("#sfx-rotator");
+  if(!btn)return;
+
+  const hasFiles=rotatorFiles.length>0;
+  const currentName=hasFiles?rotatorFiles[rotatorPos].name.replace(/\.[^/.]+$/,""):"";
+  const nextPos=(rotatorPos+1)%Math.max(1,rotatorFiles.length);
+  const nextName=hasFiles&&rotatorFiles.length>1?rotatorFiles[nextPos].name.replace(/\.[^/.]+$/,""):"";
+
+  btn.className="sfx-btn rotator"+(hasFiles?" loaded":"")+(rotatorPlaying?" playing":"");
+
+  btn.innerHTML=`
+    <div class="rotator-badge">↻ ROTATOR</div>
+    <div class="rotator-count">${hasFiles?rotatorPos+1+"/"+rotatorFiles.length:""}</div>
+    <div class="sfx-dot ${rotatorPlaying?"running":hasFiles?"ready":""}"></div>
+    <div class="sfx-name ${hasFiles?"":"empty"}" style="margin-top:4px;font-size:10px;">${hasFiles?currentName:"right-click → set folder"}</div>
+    ${nextName?`<div class="rotator-next">next: ${nextName}</div>`:""}
+    <div class="sfx-slot-num">1</div>
+  `;
+  btn.onclick=()=>fireRotator();
+  btn.oncontextmenu=e=>{e.preventDefault();showRotatorCtx(e);};
+}
+
+function showRotatorCtx(e){
+  // Simple context menu for rotator options
+  const existing=document.getElementById("rotator-ctx");
+  if(existing)existing.remove();
+  const menu=document.createElement("div");
+  menu.id="rotator-ctx";
+  menu.style.cssText=`position:fixed;z-index:9100;background:#1a1a1a;border:1px solid #cc0000;
+    border-radius:4px;padding:4px 0;min-width:180px;box-shadow:0 4px 20px rgba(0,0,0,0.7);`;
+  menu.style.left=Math.min(e.clientX,window.innerWidth-200)+"px";
+  menu.style.top=Math.min(e.clientY,window.innerHeight-120)+"px";
+
+  const items=[
+    {label:"📁 Set Rotator Folder",fn:async()=>{await selectRotatorFolder();}},
+    {label:"↻ Shuffle Order",fn:()=>{rotatorFiles.sort(()=>Math.random()-0.5);rotatorPos=0;renderRotatorSlot();}},
+    {label:"⏮ Reset to First",fn:()=>{rotatorPos=0;renderRotatorSlot();}},
+  ];
+  items.forEach(({label,fn})=>{
+    const item=document.createElement("div");
+    item.style.cssText="padding:6px 14px;font-family:'Rajdhani',sans-serif;font-weight:600;font-size:12px;color:#eee;cursor:pointer;white-space:nowrap;";
+    item.textContent=label;
+    item.onmouseenter=()=>item.style.background="#2a0000";
+    item.onmouseleave=()=>item.style.background="";
+    item.onclick=()=>{menu.remove();fn();};
+    menu.appendChild(item);
+  });
+  document.body.appendChild(menu);
+  setTimeout(()=>document.addEventListener("click",()=>menu.remove(),{once:true}),10);
+}
+
 // ══ INIT ══
-async function init(){await restoreState();renderMusicChannels();renderSFX();renderSeq();setupPageTabDrop();updateAMPM();}
+async function init(){
+  await restoreState();
+  renderMusicChannels();renderSFX();renderSeq();setupPageTabDrop();updateAMPM();
+  // Restore rotator folder
+  try{
+    const rh=await getIDB("rotator_folder");
+    if(rh){
+      const perm=await rh.requestPermission({mode:"readwrite"});
+      if(perm==="granted"){rotatorDirHandle=rh;await loadRotatorFiles();}
+    }
+  }catch(e){}
+}
 init();
 </script>
 </body>
