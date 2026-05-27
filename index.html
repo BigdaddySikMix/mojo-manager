@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>A1 Mojo Manager v2.1.15</title>
+<title>A1 Mojo Manager v2.1.16</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Share+Tech+Mono&family=Rajdhani:wght@600;700&display=swap');
 :root {
@@ -227,7 +227,7 @@ body{background:var(--black);font-family:"Share Tech Mono",monospace;color:var(-
 /* Page tab hover preview */
 .stab-preview{position:fixed;z-index:8000;background:#1a0000;border:1px solid #cc0000;
   border-radius:3px;padding:6px 0;min-width:200px;max-width:280px;
-  box-shadow:0 4px 16px rgba(0,0,0,0.8);pointer-events:none;}
+  box-shadow:0 4px 16px rgba(0,0,0,0.8);}
 .stab-preview-title{font-family:"Bebas Neue",sans-serif;font-size:9px;letter-spacing:2px;
   color:#dd7777;padding:2px 10px 5px;border-bottom:1px solid #330000;margin-bottom:3px;}
 .stab-preview-item{padding:3px 10px;font-family:"Rajdhani",sans-serif;font-weight:600;
@@ -372,7 +372,7 @@ body{background:var(--black);font-family:"Share Tech Mono",monospace;color:var(-
   <div id="startup-modal">
     <img id="startup-logo" src="https://bigdaddysikmix.github.io/mojo-manager/A1-logo.png" onerror="this.style.display='none'">
     <div id="startup-title">A1 MOJO MANAGER</div>
-    <div id="startup-sub">AREA MANAGER CONSOLE • v2.1.15</div>
+    <div id="startup-sub">AREA MANAGER CONSOLE • v2.1.16</div>
     <div id="startup-time">--:--:--</div>
     <div id="startup-date">LOADING...</div>
     <div id="startup-msg">
@@ -396,7 +396,7 @@ body{background:var(--black);font-family:"Share Tech Mono",monospace;color:var(-
   <div id="clock-wrap">
     <div id="clock">--:--:--</div>
     <div id="clock-date">...</div>
-    <div id="ver-lbl">v2.1.15</div>
+    <div id="ver-lbl">v2.1.16</div>
   </div>
 </div>
 
@@ -544,7 +544,7 @@ body{background:var(--black);font-family:"Share Tech Mono",monospace;color:var(-
 
 <!-- STATUS BAR -->
 <div id="statusbar">
-  <div id="sl">A1 MOJO MANAGER v2.1.15 • DABBING PUG PRODUCTIONS</div>
+  <div id="sl">A1 MOJO MANAGER v2.1.16 • DABBING PUG PRODUCTIONS</div>
   <div id="sr">A1 GARAGE DOOR SERVICE</div>
 </div>
 
@@ -1447,11 +1447,11 @@ function showSlotChoiceMenu(e,idx){
   menu.style.left=Math.min(clickX,window.innerWidth-200)+"px";
   menu.style.top=Math.min(clickY,window.innerHeight-100)+"px";
   const items=[
-    {label:"✂  Open Trim / Cue Editor",fn:()=>openEditor(idx,false)},
+    {label:"✂  Open Trim / Cue Editor",fn:()=>{menu.remove();openEditor(idx,false);}},
     {label:"📁  Change File",fn:()=>{
-      // Synthesize a fake event with the saved position so ctx menu appears in right place
-      const fakeE={clientX:clickX,clientY:clickY,preventDefault:()=>{}};
-      showCtxMenu(fakeE,idx);
+      menu.remove();
+      // Small delay so the menu is fully gone before ctx menu opens
+      setTimeout(()=>openFileListForSlot(idx,clickX,clickY),50);
     }},
   ];
   items.forEach(({label,fn})=>{
@@ -1460,11 +1460,22 @@ function showSlotChoiceMenu(e,idx){
     item.textContent=label;
     item.onmouseenter=()=>item.style.background="#2a0000";
     item.onmouseleave=()=>item.style.background="";
-    item.onclick=()=>{menu.remove();fn();};
+    item.onclick=(ev)=>{ev.stopPropagation();fn();};
     menu.appendChild(item);
   });
   document.body.appendChild(menu);
   setTimeout(()=>document.addEventListener("click",()=>menu.remove(),{once:true}),10);
+}
+
+function openFileListForSlot(idx,x,y){
+  if(!dirHandle)return;
+  ctxTargetIdx=idx;
+  populateCtxList("");
+  ctxMenu.classList.add("visible");
+  ctxMenu.style.left=Math.min(x,window.innerWidth-ctxMenu.offsetWidth-10)+"px";
+  ctxMenu.style.top=Math.min(y,window.innerHeight-ctxMenu.offsetHeight-10)+"px";
+  ctxSearch.value="";
+  setTimeout(()=>ctxSearch.focus(),60);
 }
 
 function closeAllMenus(){
@@ -1505,11 +1516,16 @@ function showPagePreview(tab,pageIdx){
   if(items.length===0){
     const empty=document.createElement("div");empty.className="stab-preview-empty";empty.textContent="no files loaded";preview.appendChild(empty);
   } else {
-    items.forEach(({num,name})=>{
+    items.forEach(({num,name,idx})=>{
       const row=document.createElement("div");row.className="stab-preview-item";
+      row.style.cursor="pointer";row.title="Click to jump to this page";
       const n=document.createElement("div");n.className="stab-preview-num";n.textContent=num;
       const nm=document.createElement("div");nm.className="stab-preview-name";nm.textContent=name;
-      row.append(n,nm);preview.appendChild(row);
+      row.append(n,nm);
+      row.onmouseenter=()=>row.style.background="#2a0000";
+      row.onmouseleave=()=>row.style.background="";
+      row.onclick=()=>{hidePagePreview();switchSFXPage(pageIdx);};
+      preview.appendChild(row);
     });
   }
   document.body.appendChild(preview);
