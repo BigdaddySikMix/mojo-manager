@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>A1 Mojo Manager v2.1.9</title>
+<title>A1 Mojo Manager v2.1.11</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Share+Tech+Mono&family=Rajdhani:wght@600;700&display=swap');
 :root {
@@ -355,7 +355,7 @@ body{background:var(--black);font-family:"Share Tech Mono",monospace;color:var(-
   <div id="startup-modal">
     <img id="startup-logo" src="https://bigdaddysikmix.github.io/mojo-manager/A1-logo.png" onerror="this.style.display='none'">
     <div id="startup-title">A1 MOJO MANAGER</div>
-    <div id="startup-sub">AREA MANAGER CONSOLE • v2.1.9</div>
+    <div id="startup-sub">AREA MANAGER CONSOLE • v2.1.11</div>
     <div id="startup-time">--:--:--</div>
     <div id="startup-date">LOADING...</div>
     <div id="startup-msg">
@@ -379,7 +379,7 @@ body{background:var(--black);font-family:"Share Tech Mono",monospace;color:var(-
   <div id="clock-wrap">
     <div id="clock">--:--:--</div>
     <div id="clock-date">...</div>
-    <div id="ver-lbl">v2.1.9</div>
+    <div id="ver-lbl">v2.1.11</div>
   </div>
 </div>
 
@@ -527,7 +527,7 @@ body{background:var(--black);font-family:"Share Tech Mono",monospace;color:var(-
 
 <!-- STATUS BAR -->
 <div id="statusbar">
-  <div id="sl">A1 MOJO MANAGER v2.1.9 • DABBING PUG PRODUCTIONS</div>
+  <div id="sl">A1 MOJO MANAGER v2.1.11 • DABBING PUG PRODUCTIONS</div>
   <div id="sr">A1 GARAGE DOOR SERVICE</div>
 </div>
 
@@ -660,6 +660,7 @@ async function loadFromFolder(){
           const fh=fileMap[s.name];const file=await fh.getFile();
           carts[i].name=s.name;carts[i].file=URL.createObjectURL(file);carts[i].fileHandle=fh;usedNames.add(s.name);
           carts[i]._cleared=false;
+          carts[i].inPoint=s.inPoint||0;carts[i].outPoint=s.outPoint||0;carts[i].cuePoint=s.cuePoint||0;
           loadDuration(i,carts[i].file);
         } else {carts[i].file=null;carts[i].fileHandle=null;if(!s||!s.name)carts[i].name=null;carts[i]._cleared=false;}
       }
@@ -1145,7 +1146,7 @@ function renderSeq(){
     } else {seqSlots[i]=null;slot.className="seq-slot";if(nm)nm.textContent="empty";const x=slot.querySelector(".seq-x");if(x)x.remove();}
     slot.ondragover=e=>{if(e.dataTransfer.types.includes("text/cart-idx")){e.preventDefault();slot.classList.add("drag-over");}};
     slot.ondragleave=()=>slot.classList.remove("drag-over");
-    slot.ondrop=e=>{e.preventDefault();slot.classList.remove("drag-over");const fromStr=e.dataTransfer.getData("text/cart-idx");if(fromStr==="")return;const fi=parseInt(fromStr);if(isNaN(fi)||fi<MUSIC_SLOTS)return;seqSlots[i]=fi;renderSeq();};
+    slot.ondrop=e=>{e.preventDefault();slot.classList.remove("drag-over");const fromStr=e.dataTransfer.getData("text/cart-idx");if(fromStr==="")return;const fi=parseInt(fromStr);if(isNaN(fi))return;seqSlots[i]=fi;renderSeq();};
     slot.oncontextmenu=e=>{e.preventDefault();if(cidx!==null&&carts[cidx]&&carts[cidx].file)openEditor(cidx,true);};
   }
 }
@@ -1414,8 +1415,8 @@ function openEditor(idx,cueMode){
   // Restore saved points or defaults
   editorInPct=c.inPoint>0&&editorDuration>0?c.inPoint/editorDuration:0;
   editorOutPct=c.outPoint>0&&editorDuration>0?c.outPoint/editorDuration:1;
-  editorCuePct=c.cuePoint>0&&editorDuration>0?c.cuePoint/editorDuration:0.5;
   editorHasCue=c.cuePoint>0;
+  editorCuePct=editorHasCue&&editorDuration>0?c.cuePoint/editorDuration:0.5;
 
   document.getElementById("editor-trackname").textContent=c.name||"";
   document.getElementById("editor-mode-lbl").textContent=cueMode?"SEQ CUE MODE — set cue point to chain next slot":"TRIM MODE — set IN/OUT to clip silence";
