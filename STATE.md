@@ -1,6 +1,6 @@
 A1 MOJO MANAGER — MASTER STATE FILE
 Claude Code Handoff Document
-Date: July 7, 2026 — updated end of session
+Date: July 13, 2026 — updated end of session
 Owner: JD Ploetz, Area Manager — ABQ / TUS / SFE / SRV
 Built with: Claude (claude.ai) — transitioning to Claude Code
 
@@ -32,7 +32,7 @@ LIVE APP & REPOSITORY
 Live URL:   https://bigdaddysikmix.github.io/mojo-manager/
 GitHub:     github.com/BigdaddySikMix/mojo-manager
 Main file:  index.html (the entire app)
-Current version: v2.1.16
+Current version: v2.1.17
 
 Deployment process:
   1. Edit index.html
@@ -181,7 +181,7 @@ On loadFromFolder():
   5. Never touch _cleared slots
 
 ═══════════════════════════════════════════════════════
-FEATURE SET — v2.1.16 COMPLETE
+FEATURE SET — v2.1.17 COMPLETE
 ═══════════════════════════════════════════════════════
 
 HEADER:
@@ -210,6 +210,18 @@ MASTER DECK:
   - Single slider ducks all 5 music channels simultaneously
   - Does NOT affect SFX slots
   - RESET button returns to 100%
+  - MASTER FADE button (red/orange, emergency accent) — fades out and
+    stops EVERY currently playing slot at once: all music channels,
+    all playing SFX slots, and the rotator if it's playing
+  - Uses the same 2-second linear fade curve as the per-slot fade (↓)
+    buttons, regardless of each music channel's own SPD setting
+  - Does NOT chain Play-Next (PN) to the next track — full stop, no
+    auto-advance after a master fade
+  - Does NOT clear slot assignments or tombstones — just stops playback,
+    same as a normal STOP/fade-out
+  - Guarded by masterFading flag so rapid re-clicks don't double-fire
+  - State: masterFading; functions: masterFadeAll(), fadeAndStopSlot(),
+    fadeAndStopRotator()
 
 MUSIC CHANNELS (5 slots, idx 0-4):
   - Drag handle (⠿) for reordering via drag/drop
@@ -302,7 +314,7 @@ RIGHT-CLICK SYSTEM:
   - Seq slot → openEditor(idx, true) directly
 
 ═══════════════════════════════════════════════════════
-KNOWN BUGS & TODO — NEXT BUILD (v2.1.17)
+KNOWN BUGS & TODO — NEXT BUILD (v2.1.18)
 ═══════════════════════════════════════════════════════
 
 1. EDITOR CURSOR CLICK-TO-SEEK (HIGH PRIORITY)
@@ -392,6 +404,8 @@ v2.1.14  Right-click choice menu, Rotator pick specific clip,
          page tab hover preview, SFX fade button
 v2.1.15  Change File fix, page preview up-left, editor wheel zoom
 v2.1.16  Page preview clickable, Change File conflict resolved
+v2.1.17  MASTER FADE button — emergency fade+stop of all playing
+         music/SFX/rotator audio at once, 2s fade curve
 
 ═══════════════════════════════════════════════════════
 FUTURE WISHLIST

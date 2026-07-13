@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>A1 Mojo Manager v2.1.16</title>
+<title>A1 Mojo Manager v2.1.17</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Share+Tech+Mono&family=Rajdhani:wght@600;700&display=swap');
 :root {
@@ -101,6 +101,11 @@ body{background:var(--black);font-family:"Share Tech Mono",monospace;color:var(-
   color:#7777cc;font-family:"Bebas Neue",sans-serif;font-size:10px;letter-spacing:1px;
   cursor:pointer;transition:all 0.1s;flex-shrink:0;}
 #duck-reset:hover{border-color:#9999ff;color:#bbbbff;}
+#master-fade-btn{padding:2px 10px;background:#2a0500;border:1px solid var(--red2);border-radius:2px;
+  color:#ff6644;font-family:"Bebas Neue",sans-serif;font-size:10px;letter-spacing:1px;
+  cursor:pointer;transition:all 0.1s;flex-shrink:0;}
+#master-fade-btn:hover{background:var(--red);border-color:var(--red2);color:#fff;box-shadow:0 0 8px rgba(255,48,48,0.5);}
+#master-fade-btn.fading{background:var(--red);color:#fff;border-color:var(--red2);animation:fadepulse 0.5s infinite;}
 #duck-note{font-size:8px;color:#444466;letter-spacing:1px;flex-shrink:0;}
 
 /* ══ MAIN ══ */
@@ -372,7 +377,7 @@ body{background:var(--black);font-family:"Share Tech Mono",monospace;color:var(-
   <div id="startup-modal">
     <img id="startup-logo" src="https://bigdaddysikmix.github.io/mojo-manager/A1-logo.png" onerror="this.style.display='none'">
     <div id="startup-title">A1 MOJO MANAGER</div>
-    <div id="startup-sub">AREA MANAGER CONSOLE • v2.1.16</div>
+    <div id="startup-sub">AREA MANAGER CONSOLE • v2.1.17</div>
     <div id="startup-time">--:--:--</div>
     <div id="startup-date">LOADING...</div>
     <div id="startup-msg">
@@ -396,7 +401,7 @@ body{background:var(--black);font-family:"Share Tech Mono",monospace;color:var(-
   <div id="clock-wrap">
     <div id="clock">--:--:--</div>
     <div id="clock-date">...</div>
-    <div id="ver-lbl">v2.1.16</div>
+    <div id="ver-lbl">v2.1.17</div>
   </div>
 </div>
 
@@ -428,6 +433,7 @@ body{background:var(--black);font-family:"Share Tech Mono",monospace;color:var(-
   <input type="range" id="duck-slider" min="0" max="100" value="100">
   <div id="duck-pct">100%</div>
   <div id="duck-reset" onclick="resetDuck()">RESET</div>
+  <div id="master-fade-btn" onclick="masterFadeAll()">⚠ MASTER FADE</div>
   <div id="duck-note">duck all music channels while talking</div>
 </div>
 
@@ -544,7 +550,7 @@ body{background:var(--black);font-family:"Share Tech Mono",monospace;color:var(-
 
 <!-- STATUS BAR -->
 <div id="statusbar">
-  <div id="sl">A1 MOJO MANAGER v2.1.16 • DABBING PUG PRODUCTIONS</div>
+  <div id="sl">A1 MOJO MANAGER v2.1.17 • DABBING PUG PRODUCTIONS</div>
   <div id="sr">A1 GARAGE DOOR SERVICE</div>
 </div>
 
@@ -615,6 +621,69 @@ function resetDuck(){
   for(let i=0;i<MUSIC_SLOTS;i++){if(carts[i].audio)carts[i].audio.volume=carts[i].volume;}
 }
 setDuckGrad(100);
+
+// ══ MASTER FADE — emergency fade+stop everything at once ══
+let masterFading=false;
+function masterFadeAll(){
+  if(masterFading)return;
+  const FADE_MS=2000,steps=40,stepTime=FADE_MS/steps;
+  const btn=document.getElementById("master-fade-btn");
+  const playingIdx=[];
+  for(let i=0;i<TOTAL;i++){if(carts[i].playing&&carts[i].audio)playingIdx.push(i);}
+  const hasRotator=rotatorPlaying&&rotatorAudio;
+  if(playingIdx.length===0&&!hasRotator)return;
+
+  masterFading=true;
+  if(btn)btn.classList.add("fading");
+
+  playingIdx.forEach(i=>{
+    if(i<MUSIC_SLOTS&&carts[i].fadeInterval){clearInterval(carts[i].fadeInterval);carts[i].fadeInterval=null;}
+    if(i<MUSIC_SLOTS)updateFadeBtn(i,true);
+    else{const fb=document.getElementById("sfxfade-"+i);if(fb)fb.classList.add("fading");}
+    fadeAndStopSlot(i,steps,stepTime);
+  });
+  if(hasRotator)fadeAndStopRotator(steps,stepTime);
+
+  setTimeout(()=>{masterFading=false;if(btn)btn.classList.remove("fading");},FADE_MS+150);
+}
+function fadeAndStopSlot(i,steps,stepTime){
+  const c=carts[i];const a=c.audio;if(!a)return;
+  const startVol=a.volume;let step=0;
+  const fadeInt=setInterval(()=>{
+    step++;a.volume=Math.max(0,startVol*(1-step/steps));
+    if(step>=steps){
+      clearInterval(fadeInt);
+      if(c.audio){c.audio.pause();c.audio.currentTime=0;c.audio=null;}
+      c.playing=false;
+      if(i<MUSIC_SLOTS){
+        c.volume=FADE_RESET_VOL;
+        const fdr=document.getElementById("mchfdr-"+i),pct=document.getElementById("mchpct-"+i);
+        if(fdr){fdr.value=Math.round(FADE_RESET_VOL*100);setFdrGrad(fdr,FADE_RESET_VOL);}
+        if(pct)pct.textContent=Math.round(FADE_RESET_VOL*100)+"%";
+        updateFadeBtn(i,false);resetSeekBar(i);
+        const cdEl=document.getElementById("mchcd-"+i);
+        if(cdEl){if(c.duration>0){cdEl.textContent=fmtTime(c.duration);cdEl.className="mch-cd loaded-idle";}else{cdEl.textContent="--:--";cdEl.className="mch-cd";}}
+      } else {
+        const fb=document.getElementById("sfxfade-"+i);if(fb)fb.classList.remove("fading");
+        const cdEl=document.getElementById("sfxcd-"+i);
+        if(cdEl){if(c.duration>0){cdEl.textContent=fmtTime(c.duration);cdEl.className="sfx-cd idle";}else{cdEl.textContent="";cdEl.className="sfx-cd";}}
+      }
+      updateCartUI(i);
+    }
+  },stepTime);
+}
+function fadeAndStopRotator(steps,stepTime){
+  const a=rotatorAudio;if(!a)return;
+  const startVol=a.volume;let step=0;
+  const fadeInt=setInterval(()=>{
+    step++;a.volume=Math.max(0,startVol*(1-step/steps));
+    if(step>=steps){
+      clearInterval(fadeInt);
+      if(rotatorAudio){rotatorAudio.pause();rotatorAudio=null;}
+      rotatorPlaying=false;renderRotatorSlot();
+    }
+  },stepTime);
+}
 
 // ══ SPLASH ══
 function closeSplash(){const o=document.getElementById("startup-overlay");o.style.opacity="0";o.style.transition="opacity 0.4s";setTimeout(()=>o.style.display="none",400);}
