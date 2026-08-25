@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>A1 Mojo Manager v2.1.17</title>
+<title>A1 Mojo Manager v2.1.18</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Share+Tech+Mono&family=Rajdhani:wght@600;700&display=swap');
 :root {
@@ -53,18 +53,18 @@ body{background:var(--black);font-family:"Share Tech Mono",monospace;color:var(-
 
 /* ══ MOJO STRIP ══ */
 #mojo-strip{background:#0a0500;border-bottom:2px solid #2a1000;
-  padding:4px 12px;display:flex;align-items:center;gap:10px;flex-shrink:0;height:36px;}
-#mojo-countdown-lbl{font-family:"Bebas Neue",sans-serif;font-size:11px;color:var(--lbl);letter-spacing:3px;flex-shrink:0;}
-#mojo-countdown{font-family:"Share Tech Mono",monospace;font-size:15px;color:var(--green);
-  background:var(--inset);border:1px solid var(--border);border-radius:2px;padding:2px 8px;flex-shrink:0;}
-#mojo-countdown.soon{color:var(--amber);}
-#mojo-countdown.now{color:#fff;background:var(--red);border-color:var(--red2);animation:runpulse 0.6s infinite;}
+  padding:4px 12px;display:flex;align-items:center;gap:8px;flex-shrink:0;height:36px;}
+.mojo-block{display:flex;align-items:center;gap:4px;flex-shrink:0;}
+.mojo-lbl{font-family:"Bebas Neue",sans-serif;font-size:9px;color:var(--lbl);letter-spacing:1px;flex-shrink:0;}
+.mojo-cd{font-family:"Share Tech Mono",monospace;font-size:13px;color:var(--green);
+  background:var(--inset);border:1px solid var(--border);border-radius:2px;padding:2px 6px;flex-shrink:0;min-width:44px;text-align:center;}
+.mojo-cd.soon{color:var(--amber);}
+.mojo-cd.now{color:#fff;background:var(--red);border-color:var(--red2);animation:runpulse 0.6s infinite;}
 @keyframes runpulse{0%,100%{opacity:1;}50%{opacity:0.5;}}
-#mojo-time-lbl{font-size:9px;color:var(--grey);flex-shrink:0;}
-#mojo-time{background:var(--inset);border:1px solid var(--border);border-radius:2px;
-  padding:2px 5px;font-size:10px;color:var(--offwhite);font-family:"Share Tech Mono",monospace;outline:none;width:80px;}
-#mojo-time:focus{border-color:#444;}
-#mojo-ampm{font-family:"Bebas Neue",sans-serif;font-size:12px;color:var(--amber);letter-spacing:1px;flex-shrink:0;}
+.mojo-time-in{background:var(--inset);border:1px solid var(--border);border-radius:2px;
+  padding:2px 4px;font-size:9px;color:var(--offwhite);font-family:"Share Tech Mono",monospace;outline:none;width:64px;}
+.mojo-time-in:focus{border-color:#444;}
+.mojo-ampm-txt{font-family:"Bebas Neue",sans-serif;font-size:11px;color:var(--amber);letter-spacing:1px;flex-shrink:0;}
 #join-btn{padding:5px 14px;background:#002200;border:2px solid var(--green);border-radius:3px;
   color:var(--green);font-family:"Bebas Neue",sans-serif;font-size:15px;letter-spacing:3px;
   cursor:pointer;transition:all 0.15s;flex-shrink:0;}
@@ -377,7 +377,7 @@ body{background:var(--black);font-family:"Share Tech Mono",monospace;color:var(-
   <div id="startup-modal">
     <img id="startup-logo" src="https://bigdaddysikmix.github.io/mojo-manager/A1-logo.png" onerror="this.style.display='none'">
     <div id="startup-title">A1 MOJO MANAGER</div>
-    <div id="startup-sub">AREA MANAGER CONSOLE • v2.1.17</div>
+    <div id="startup-sub">AREA MANAGER CONSOLE • v2.1.18</div>
     <div id="startup-time">--:--:--</div>
     <div id="startup-date">LOADING...</div>
     <div id="startup-msg">
@@ -401,7 +401,7 @@ body{background:var(--black);font-family:"Share Tech Mono",monospace;color:var(-
   <div id="clock-wrap">
     <div id="clock">--:--:--</div>
     <div id="clock-date">...</div>
-    <div id="ver-lbl">v2.1.17</div>
+    <div id="ver-lbl">v2.1.18</div>
   </div>
 </div>
 
@@ -416,11 +416,18 @@ body{background:var(--black);font-family:"Share Tech Mono",monospace;color:var(-
 
 <!-- MOJO STRIP -->
 <div id="mojo-strip">
-  <div id="mojo-countdown-lbl">TIME TILL MOJO</div>
-  <div id="mojo-countdown">--:--</div>
-  <div id="mojo-time-lbl">CALL TIME:</div>
-  <input type="time" id="mojo-time" value="07:00">
-  <span id="mojo-ampm">AM</span>
+  <div class="mojo-block">
+    <div class="mojo-lbl">MOJO 1</div>
+    <div id="mojo-countdown-1" class="mojo-cd">--:--</div>
+    <input type="time" id="mojo-time-1" class="mojo-time-in" value="07:00">
+    <span id="mojo-ampm-1" class="mojo-ampm-txt">AM</span>
+  </div>
+  <div class="mojo-block">
+    <div class="mojo-lbl">MOJO 2</div>
+    <div id="mojo-countdown-2" class="mojo-cd">--:--</div>
+    <input type="time" id="mojo-time-2" class="mojo-time-in" value="10:30">
+    <span id="mojo-ampm-2" class="mojo-ampm-txt">AM</span>
+  </div>
   <div id="join-btn" onclick="joinMeeting()">JOIN MOJO CALL</div>
   <input type="text" id="meet-link" placeholder="paste Teams meeting link here...">
   <div id="vid-btn" onclick="openVidURL()">▶ OPEN URL</div>
@@ -550,7 +557,7 @@ body{background:var(--black);font-family:"Share Tech Mono",monospace;color:var(-
 
 <!-- STATUS BAR -->
 <div id="statusbar">
-  <div id="sl">A1 MOJO MANAGER v2.1.17 • DABBING PUG PRODUCTIONS</div>
+  <div id="sl">A1 MOJO MANAGER v2.1.18 • DABBING PUG PRODUCTIONS</div>
   <div id="sr">A1 GARAGE DOOR SERVICE</div>
 </div>
 
@@ -581,18 +588,31 @@ function updateClock(){
 }
 setInterval(updateClock,1000);updateClock();
 
-function updateMojoCountdown(now){
-  const val=document.getElementById("mojo-time").value;if(!val)return;
+function updateMojoCountdownFor(now,timeId,cdId){
+  const timeEl=document.getElementById(timeId);const val=timeEl?timeEl.value:"";if(!val)return false;
   const [h,m]=val.split(":").map(Number);const target=new Date(now);target.setHours(h,m,0,0);
   if(target<=now)target.setDate(target.getDate()+1);
   const diff=Math.max(0,Math.floor((target-now)/1000));
-  const cd=document.getElementById("mojo-countdown");if(!cd)return;
-  if(diff===0){cd.textContent="GO!";cd.className="now";document.getElementById("join-btn").classList.add("pulse");}
-  else if(diff<=300){cd.textContent=String(Math.floor(diff/60)).padStart(2,"0")+":"+String(diff%60).padStart(2,"0");cd.className="soon";}
-  else{cd.textContent=String(Math.floor(diff/3600)).padStart(2,"0")+":"+String(Math.floor((diff%3600)/60)).padStart(2,"0");cd.className="";}
+  const cd=document.getElementById(cdId);if(!cd)return false;
+  if(diff===0){cd.textContent="GO!";cd.className="mojo-cd now";return true;}
+  else if(diff<=300){cd.textContent=String(Math.floor(diff/60)).padStart(2,"0")+":"+String(diff%60).padStart(2,"0");cd.className="mojo-cd soon";}
+  else{cd.textContent=String(Math.floor(diff/3600)).padStart(2,"0")+":"+String(Math.floor((diff%3600)/60)).padStart(2,"0");cd.className="mojo-cd";}
+  return false;
 }
-function updateAMPM(){const val=document.getElementById("mojo-time").value;if(!val)return;const h=parseInt(val.split(":")[0]);const el=document.getElementById("mojo-ampm");if(el)el.textContent=h<12?"AM":"PM";}
-document.getElementById("mojo-time").addEventListener("change",()=>{localStorage.setItem("a1mojo2_time",document.getElementById("mojo-time").value);updateAMPM();});
+function updateMojoCountdown(now){
+  const go1=updateMojoCountdownFor(now,"mojo-time-1","mojo-countdown-1");
+  const go2=updateMojoCountdownFor(now,"mojo-time-2","mojo-countdown-2");
+  const joinBtn=document.getElementById("join-btn");
+  if(joinBtn)joinBtn.classList.toggle("pulse",go1||go2);
+}
+function updateAMPM(){
+  [["mojo-time-1","mojo-ampm-1"],["mojo-time-2","mojo-ampm-2"]].forEach(([timeId,ampmId])=>{
+    const val=document.getElementById(timeId).value;if(!val)return;
+    const h=parseInt(val.split(":")[0]);const el=document.getElementById(ampmId);if(el)el.textContent=h<12?"AM":"PM";
+  });
+}
+document.getElementById("mojo-time-1").addEventListener("change",()=>{localStorage.setItem("a1mojo2_time",document.getElementById("mojo-time-1").value);updateAMPM();});
+document.getElementById("mojo-time-2").addEventListener("change",()=>{localStorage.setItem("a1mojo2_time2",document.getElementById("mojo-time-2").value);updateAMPM();});
 
 // ══ MEETING / VIDEO URL ══
 function joinMeeting(){const url=document.getElementById("meet-link").value.trim();if(url)window.open(url,"_blank");}
@@ -706,7 +726,8 @@ function setFolderBtnDone(){
   const ra=document.getElementById("reload-arrow");if(ra)ra.style.display="inline";
 }
 async function restoreState(){
-  const t=localStorage.getItem("a1mojo2_time");if(t)document.getElementById("mojo-time").value=t;
+  const t=localStorage.getItem("a1mojo2_time");if(t)document.getElementById("mojo-time-1").value=t;
+  const t2=localStorage.getItem("a1mojo2_time2");if(t2)document.getElementById("mojo-time-2").value=t2;
   const l=localStorage.getItem("a1mojo2_meetlink");if(l)document.getElementById("meet-link").value=l;
   const v=localStorage.getItem("a1mojo2_vidurl");if(v)document.getElementById("vid-url").value=v;
   const saved=getSavedCarts();
@@ -826,7 +847,7 @@ function setupDragDrop(el,globalIdx){
     const file=e.dataTransfer.files[0];if(file&&file.type.startsWith("audio/"))await assignFile(globalIdx,file);
   });
 }
-function swapCarts(a,b){const fields=["name","file","fileHandle","duration","auto","volume","fadeSpeed"];fields.forEach(f=>{const tmp=carts[a][f];carts[a][f]=carts[b][f];carts[b][f]=tmp;});saveCarts();renderMusicChannels();renderSFX();}
+function swapCarts(a,b){const fields=["name","file","fileHandle","duration","auto","volume","fadeSpeed","inPoint","outPoint","cuePoint"];fields.forEach(f=>{const tmp=carts[a][f];carts[a][f]=carts[b][f];carts[b][f]=tmp;});saveCarts();renderMusicChannels();renderSFX();}
 async function assignFile(idx,file){
   if(dirHandle){
     try{
@@ -842,6 +863,7 @@ async function assignFile(idx,file){
   carts[idx].file=URL.createObjectURL(file);
   carts[idx].fileHandle=null;
   carts[idx]._cleared=false;
+  carts[idx].inPoint=0;carts[idx].outPoint=0;carts[idx].cuePoint=0;
   loadDuration(idx,carts[idx].file);
   saveCarts();
   if(idx<MUSIC_SLOTS)renderMusicChannels();else renderSFX();
@@ -875,6 +897,7 @@ async function pickFile(idx){
     carts[idx].name=file.name.replace(/\.[^/.]+$/,"");
     carts[idx].file=URL.createObjectURL(file);
     carts[idx].fileHandle=fh;
+    carts[idx].inPoint=0;carts[idx].outPoint=0;carts[idx].cuePoint=0;
     loadDuration(idx,carts[idx].file);
     saveCarts();
     if(idx<MUSIC_SLOTS)renderMusicChannels();else renderSFX();
@@ -1346,6 +1369,7 @@ function populateCtxList(filter){
         carts[targetIdx].file=URL.createObjectURL(file);
         carts[targetIdx].fileHandle=fh;
         carts[targetIdx]._cleared=false;
+        carts[targetIdx].inPoint=0;carts[targetIdx].outPoint=0;carts[targetIdx].cuePoint=0;
         loadDuration(targetIdx,carts[targetIdx].file);
         saveCarts();
         if(targetIdx<MUSIC_SLOTS)renderMusicChannels();else renderSFX();

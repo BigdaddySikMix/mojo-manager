@@ -32,7 +32,7 @@ LIVE APP & REPOSITORY
 Live URL:   https://bigdaddysikmix.github.io/mojo-manager/
 GitHub:     github.com/BigdaddySikMix/mojo-manager
 Main file:  index.html (the entire app)
-Current version: v2.1.17
+Current version: v2.1.18
 
 Deployment process:
   1. Edit index.html
@@ -106,7 +106,8 @@ TECH STACK — COMPLETE
     "rotator_folder" = rotator clip subfolder)
 - localStorage — persists all user settings:
     a1mojo2_carts     — slot assignments, volumes, points
-    a1mojo2_time      — call time setting
+    a1mojo2_time      — MOJO 1 call time setting
+    a1mojo2_time2     — MOJO 2 call time setting
     a1mojo2_meetlink  — Teams meeting URL
     a1mojo2_vidurl    — saved video URL
 - HTML5 Audio — all playback (no Web Audio for playback)
@@ -181,7 +182,7 @@ On loadFromFolder():
   5. Never touch _cleared slots
 
 ═══════════════════════════════════════════════════════
-FEATURE SET — v2.1.17 COMPLETE
+FEATURE SET — v2.1.18 COMPLETE
 ═══════════════════════════════════════════════════════
 
 HEADER:
@@ -200,11 +201,18 @@ FOLDER BAR:
   - Auto-restores on every open via requestPermission()
 
 MOJO STRIP:
-  - TIME TILL MOJO countdown (HH:MM → MM:SS → GO! → pulse red)
-  - Editable call time + AM/PM indicator
-  - JOIN MOJO CALL button → opens Teams link in new tab
-  - Teams link field (localStorage)
+  - TWO independent countdowns — MOJO 1 and MOJO 2 (e.g. an 8:00 call
+    and a 10:30 call), each with its own time input + AM/PM indicator
+  - Each countdown: HH:MM → MM:SS (last 5 min, amber) → GO! (red pulse)
+  - Single shared JOIN MOJO CALL button + Teams link field — pulses
+    when EITHER countdown hits GO! (same link assumed to work for both)
   - OPEN URL button + field → opens any URL (localStorage)
+  - localStorage keys: a1mojo2_time (MOJO 1), a1mojo2_time2 (MOJO 2)
+  - Elements: #mojo-time-1/#mojo-countdown-1/#mojo-ampm-1 and
+    #mojo-time-2/#mojo-countdown-2/#mojo-ampm-2 inside .mojo-block
+  - updateMojoCountdownFor(now,timeId,cdId) drives each countdown;
+    updateMojoCountdown() calls it for both and toggles #join-btn's
+    "pulse" class based on either one returning true (GO!)
 
 MASTER DECK:
   - Single slider ducks all 5 music channels simultaneously
@@ -314,7 +322,7 @@ RIGHT-CLICK SYSTEM:
   - Seq slot → openEditor(idx, true) directly
 
 ═══════════════════════════════════════════════════════
-KNOWN BUGS & TODO — NEXT BUILD (v2.1.18)
+KNOWN BUGS & TODO — NEXT BUILD (v2.1.19)
 ═══════════════════════════════════════════════════════
 
 1. EDITOR CURSOR CLICK-TO-SEEK (HIGH PRIORITY)
@@ -358,6 +366,15 @@ CRITICAL BUGS FIXED — DO NOT RE-INTRODUCE
 
 7. Context menus close immediately: all right-click menus use
    setTimeout 50ms before adding document click listener. Fixed throughout.
+
+8. Trim/cue points sticking to a NEW file after Change File / drag-drop
+   swap: inPoint/outPoint/cuePoint live on the cart slot object, not the
+   file, so assigning a new file into an already-edited slot inherited
+   the old file's trim points. Every place that assigns a new file into
+   a slot (assignFile(), pickFile(), the right-click "Change File" list
+   click handler) must reset inPoint/outPoint/cuePoint to 0. swapCarts()
+   must include inPoint/outPoint/cuePoint in its swapped fields list too,
+   or a slot-to-slot drag swap ends up with mismatched points. Fixed v2.1.18.
 
 ═══════════════════════════════════════════════════════
 RELATED STANDALONE TOOL
@@ -406,6 +423,9 @@ v2.1.15  Change File fix, page preview up-left, editor wheel zoom
 v2.1.16  Page preview clickable, Change File conflict resolved
 v2.1.17  MASTER FADE button — emergency fade+stop of all playing
          music/SFX/rotator audio at once, 2s fade curve
+v2.1.18  Two independent Mojo call-time countdowns (MOJO 1 / MOJO 2)
+         sharing one JOIN button + Teams link; fixed trim/cue points
+         sticking to a new file on Change File / drag-drop swap
 
 ═══════════════════════════════════════════════════════
 FUTURE WISHLIST
