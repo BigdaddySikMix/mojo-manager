@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>A1 Mojo Manager v2.1.18</title>
+<title>A1 Mojo Manager v2.1.19</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Share+Tech+Mono&family=Rajdhani:wght@600;700&display=swap');
 :root {
@@ -157,6 +157,13 @@ body{background:var(--black);font-family:"Share Tech Mono",monospace;color:var(-
   padding:1px 4px;cursor:pointer;transition:all 0.1s;line-height:1.4;}
 .sfx-clr:hover{background:#3333aa;color:#ffffff;border-color:#6666ff;}
 
+/* Reset to beginning — only shown when a stopped clip has a queued resume position */
+.sfx-rst{position:absolute;top:2px;left:3px;
+  font-family:"Bebas Neue",sans-serif;font-size:9px;letter-spacing:1px;color:#66ccff;
+  background:#00101a;border:1px solid #3388aa;border-radius:2px;
+  padding:1px 4px;cursor:pointer;transition:all 0.1s;line-height:1.4;z-index:2;}
+.sfx-rst:hover{background:#3388aa;color:#ffffff;border-color:#66ccff;}
+
 .mch-play{width:50px;height:26px;background:#001800;border:2px solid #1a3a1a;border-radius:3px;
   display:flex;align-items:center;justify-content:center;
   font-family:"Bebas Neue",sans-serif;font-size:11px;letter-spacing:1px;color:#2a5a2a;
@@ -180,6 +187,14 @@ body{background:var(--black);font-family:"Share Tech Mono",monospace;color:var(-
   background:var(--amber);border:2px solid var(--orange2);cursor:pointer;}
 .mch-seek-pos{font-family:"Share Tech Mono",monospace;font-size:9px;color:var(--amber);
   width:34px;text-align:right;flex-shrink:0;}
+
+/* Reset to beginning */
+.mch-rst{width:20px;height:20px;flex-shrink:0;display:flex;align-items:center;justify-content:center;
+  background:#0a0a0a;border:1px solid #333;border-radius:2px;color:#3a3a3a;font-size:11px;
+  cursor:pointer;transition:all 0.15s;}
+.mch-rst:hover{border-color:var(--amber);color:var(--amber);}
+.mch-rst.active{color:var(--amber);border-color:#7a5a00;background:#1a1000;}
+.mch-rst.active:hover{background:var(--amber);color:#000;border-color:var(--amber);}
 
 /* Fader */
 .mch-fader-wrap{flex:0 0 auto;width:160px;display:flex;align-items:center;gap:5px;}
@@ -377,7 +392,7 @@ body{background:var(--black);font-family:"Share Tech Mono",monospace;color:var(-
   <div id="startup-modal">
     <img id="startup-logo" src="https://bigdaddysikmix.github.io/mojo-manager/A1-logo.png" onerror="this.style.display='none'">
     <div id="startup-title">A1 MOJO MANAGER</div>
-    <div id="startup-sub">AREA MANAGER CONSOLE • v2.1.18</div>
+    <div id="startup-sub">AREA MANAGER CONSOLE • v2.1.19</div>
     <div id="startup-time">--:--:--</div>
     <div id="startup-date">LOADING...</div>
     <div id="startup-msg">
@@ -401,7 +416,7 @@ body{background:var(--black);font-family:"Share Tech Mono",monospace;color:var(-
   <div id="clock-wrap">
     <div id="clock">--:--:--</div>
     <div id="clock-date">...</div>
-    <div id="ver-lbl">v2.1.18</div>
+    <div id="ver-lbl">v2.1.19</div>
   </div>
 </div>
 
@@ -557,7 +572,7 @@ body{background:var(--black);font-family:"Share Tech Mono",monospace;color:var(-
 
 <!-- STATUS BAR -->
 <div id="statusbar">
-  <div id="sl">A1 MOJO MANAGER v2.1.18 • DABBING PUG PRODUCTIONS</div>
+  <div id="sl">A1 MOJO MANAGER v2.1.19 • DABBING PUG PRODUCTIONS</div>
   <div id="sr">A1 GARAGE DOOR SERVICE</div>
 </div>
 
@@ -934,6 +949,8 @@ function renderMusicChannels(){
 
     // SEEK BAR
     const seekWrap=document.createElement("div");seekWrap.className="mch-seek-wrap";
+    const rstBtn=document.createElement("div");rstBtn.className="mch-rst"+((!ch.playing&&ch._queuePos>0)?" active":"");rstBtn.id="mchrst-"+i;rstBtn.textContent="⏮";rstBtn.title="Reset to beginning";
+    rstBtn.onclick=(e)=>{e.stopPropagation();resetCartQueue(i);};
     const seek=document.createElement("input");seek.type="range";seek.min=0;seek.max=1000;seek.value=0;seek.className="mch-seek";seek.id="mchseek-"+i;seek.title="Scrub / seek position";
     // Restore seek position if queued
     if(!ch.playing&&ch._queuePos>0&&ch.duration>0){
@@ -943,7 +960,10 @@ function renderMusicChannels(){
     seek.addEventListener("mousedown",()=>{ch._seeking=true;});
     seek.addEventListener("mouseup",()=>{
       ch._seeking=false;
-      if(ch.audio&&ch.duration){const pos=(seek.value/1000)*ch.duration;ch.audio.currentTime=pos;ch.startTime=Date.now()-(pos*1000);}
+      if(!ch.duration)return;
+      const pos=(seek.value/1000)*ch.duration;
+      if(ch.audio){ch.audio.currentTime=pos;ch.startTime=Date.now()-(pos*1000);}
+      else{ch._queuePos=pos;rstBtn.classList.toggle("active",pos>0);}
     });
     seek.addEventListener("input",()=>{
       const pct=seek.value/1000;setSeekGrad(seek,pct);
@@ -953,7 +973,7 @@ function renderMusicChannels(){
     const seekPos=document.createElement("div");seekPos.className="mch-seek-pos";seekPos.id="mchseekpos-"+i;
     if(!ch.playing&&ch._queuePos>0)seekPos.textContent=fmtTime(ch._queuePos);
     else seekPos.textContent="--:--";
-    seekWrap.append(seek,seekPos);
+    seekWrap.append(rstBtn,seek,seekPos);
     row1.append(handle,num,name,cdWrap,play,stop,seekWrap);
 
     // ROW 2
@@ -1026,6 +1046,12 @@ function renderSFX(){
       const fadeBtn=document.createElement("div");fadeBtn.className="sfx-fade";fadeBtn.id="sfxfade-"+idx;fadeBtn.textContent="↓";fadeBtn.title="Fade out";
       fadeBtn.onclick=(e)=>{e.stopPropagation();triggerSFXFade(idx);};
       btn.appendChild(fadeBtn);
+    }
+    // Reset-to-beginning — only when stopped with a queued resume position
+    if(loaded&&!c.playing&&c._queuePos>0){
+      const rstBtn=document.createElement("div");rstBtn.className="sfx-rst";rstBtn.id="sfxrst-"+idx;rstBtn.textContent="⏮";rstBtn.title="Reset to beginning";
+      rstBtn.onclick=(e)=>{e.stopPropagation();resetCartQueue(idx);};
+      btn.appendChild(rstBtn);
     }
     btn.onclick=()=>{if(loaded)fireCart(idx);else pickFile(idx);};
     slotNum.style.cursor="grab";slotNum.addEventListener("mousedown",()=>btn.draggable=true);slotNum.addEventListener("mouseup",()=>btn.draggable=false);
@@ -1143,17 +1169,32 @@ function stopCart(idx){
       if(seek){seek.value=Math.round(pct*1000);setSeekGrad(seek,pct);}
       if(posEl)posEl.textContent=fmtTime(savedPos);
     } else {resetSeekBar(idx);}
+    const rstBtn=document.getElementById("mchrst-"+idx);if(rstBtn)rstBtn.classList.toggle("active",savedPos>0);
     if(c.auto){const next=(idx+1)%MUSIC_SLOTS;if(carts[next].file)setTimeout(()=>fireCart(next),200);}
   } else {
     // restore pre-roll on SFX after stop
     const cdEl=document.getElementById("sfxcd-"+idx);
     if(cdEl){if(c.duration>0){cdEl.textContent=fmtTime(c.duration);cdEl.className="sfx-cd idle";}else{cdEl.textContent="";cdEl.className="sfx-cd";}}
+    if(savedPos>0)renderSFX();
   }
 }
 
 function resetSeekBar(idx){
   const seek=document.getElementById("mchseek-"+idx);const pos=document.getElementById("mchseekpos-"+idx);
   if(seek){seek.value=0;setSeekGrad(seek,0);}if(pos)pos.textContent="--:--";
+}
+
+// ══ RESET TO BEGINNING — clears a stopped slot's queued resume position ══
+function resetCartQueue(idx){
+  const c=carts[idx];
+  if(c.playing||!c._queuePos)return;
+  c._queuePos=0;
+  if(idx<MUSIC_SLOTS){
+    resetSeekBar(idx);
+    const btn=document.getElementById("mchrst-"+idx);if(btn)btn.classList.remove("active");
+  } else {
+    renderSFX();
+  }
 }
 
 function triggerFade(idx){

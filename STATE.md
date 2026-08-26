@@ -1,6 +1,6 @@
 A1 MOJO MANAGER — MASTER STATE FILE
 Claude Code Handoff Document
-Date: July 13, 2026 — updated end of session
+Date: August 26, 2026 — updated end of session
 Owner: JD Ploetz, Area Manager — ABQ / TUS / SFE / SRV
 Built with: Claude (claude.ai) — transitioning to Claude Code
 
@@ -32,7 +32,7 @@ LIVE APP & REPOSITORY
 Live URL:   https://bigdaddysikmix.github.io/mojo-manager/
 GitHub:     github.com/BigdaddySikMix/mojo-manager
 Main file:  index.html (the entire app)
-Current version: v2.1.18
+Current version: v2.1.19
 
 Deployment process:
   1. Edit index.html
@@ -182,7 +182,7 @@ On loadFromFolder():
   5. Never touch _cleared slots
 
 ═══════════════════════════════════════════════════════
-FEATURE SET — v2.1.18 COMPLETE
+FEATURE SET — v2.1.19 COMPLETE
 ═══════════════════════════════════════════════════════
 
 HEADER:
@@ -237,7 +237,13 @@ MUSIC CHANNELS (5 slots, idx 0-4):
   - Countdown timer (pre-roll duration at rest, live countdown playing)
   - CLR button (tombstone — cleared slot persists across reopen)
   - PLAY / STOP buttons
-  - Seek bar with scrub and position display
+  - Seek bar with scrub and position display — dragging it while STOPPED
+    now correctly updates the queued resume position (_queuePos), not
+    just the visual slider. Fixed v2.1.19 (see bug #8 below).
+  - ⏮ Reset-to-beginning button (left of seek bar) — only lit up/amber
+    when a stopped channel has a queued resume position; clears
+    _queuePos so the next PLAY starts fresh from the beginning (or the
+    clip's trimmed IN point). Added v2.1.19.
   - Volume fader with color gradient and percentage
   - Speed dots: Fast(2s) / Med(5s) / Slow(10s) for fade speed
   - Auto-fade button (↓) — fades to 0 then resets volume to 90%
@@ -256,6 +262,10 @@ SFX GRID (36 slots, 3 pages of 12):
   - Fade button (↓, bottom left of loaded slots) — 1.5s fade out
   - ✂ indicator = trim points set
   - ◆ indicator = cue point set
+  - ⏮ Reset-to-beginning button (top left) — same as music channels:
+    only appears on a stopped slot that has a queued resume position
+    (i.e. you stopped it mid-clip). Click clears the queued position
+    so next PLAY starts from the beginning again. Added v2.1.19.
   - Right-click LOADED slot → choice menu (Editor / Change File)
   - Right-click EMPTY slot → file picker list from folder
 
@@ -322,7 +332,7 @@ RIGHT-CLICK SYSTEM:
   - Seq slot → openEditor(idx, true) directly
 
 ═══════════════════════════════════════════════════════
-KNOWN BUGS & TODO — NEXT BUILD (v2.1.19)
+KNOWN BUGS & TODO — NEXT BUILD (v2.1.20)
 ═══════════════════════════════════════════════════════
 
 1. EDITOR CURSOR CLICK-TO-SEEK (HIGH PRIORITY)
@@ -376,6 +386,16 @@ CRITICAL BUGS FIXED — DO NOT RE-INTRODUCE
    must include inPoint/outPoint/cuePoint in its swapped fields list too,
    or a slot-to-slot drag swap ends up with mismatched points. Fixed v2.1.18.
 
+9. Seek bar drag while STOPPED did nothing real: the mouseup handler
+   only wrote the new position to ch.audio.currentTime, but STOP tears
+   the Audio object down entirely (c.audio=null) and relies solely on
+   _queuePos to remember where to resume. So dragging the slider while
+   stopped moved the visual slider and label but never touched
+   _queuePos — the next PLAY silently ignored the drag and resumed from
+   wherever you'd actually hit STOP instead. Fix: when ch.audio is null
+   on mouseup, write the dragged position into ch._queuePos directly.
+   Fixed v2.1.19.
+
 ═══════════════════════════════════════════════════════
 RELATED STANDALONE TOOL
 ═══════════════════════════════════════════════════════
@@ -426,6 +446,9 @@ v2.1.17  MASTER FADE button — emergency fade+stop of all playing
 v2.1.18  Two independent Mojo call-time countdowns (MOJO 1 / MOJO 2)
          sharing one JOIN button + Teams link; fixed trim/cue points
          sticking to a new file on Change File / drag-drop swap
+v2.1.19  Reset-to-beginning (⏮) button on music channels and SFX slots
+         when a stopped clip has a queued resume position; fixed seek
+         bar drag while stopped not actually updating resume position
 
 ═══════════════════════════════════════════════════════
 FUTURE WISHLIST
